@@ -7,6 +7,12 @@ import { fileURLToPath } from 'url'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { Categories } from './collections/Categories'
+import { Brands } from './collections/Brands'
+import { Products } from './collections/Products'
+import { News } from './collections/News'
+import { Orders } from './collections/Orders'
+import { CompanyInfo } from './collections/CompanyInfo'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,9 +23,62 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      titleSuffix: '- Ralhum Sports Admin',
+      // ogImage: '/admin-og-image.png',
+    },
+    disable: false,
+    components: {
+      // Custom admin components can be added here
+      // graphics: {
+      //   Logo: './components/Logo',
+      //   Icon: './components/Icon',
+      // },
+    },
+    livePreview: {
+      // Enable live preview for content
+      breakpoints: [
+        {
+          label: 'Mobile',
+          name: 'mobile',
+          width: 375,
+          height: 667,
+        },
+        {
+          label: 'Tablet',
+          name: 'tablet',
+          width: 768,
+          height: 1024,
+        },
+        {
+          label: 'Desktop',
+          name: 'desktop',
+          width: 1440,
+          height: 900,
+        },
+      ],
+    },
   },
-  collections: [Users, Media],
-  editor: lexicalEditor(),
+  collections: [
+    // System Collections
+    Users,
+    Media,
+    // Product Management
+    Categories,
+    Brands,
+    Products,
+    // Business Operations
+    Orders,
+    // Content Management
+    News,
+    CompanyInfo,
+  ],
+  editor: lexicalEditor({
+    features: ({ defaultFeatures }) => [
+      ...defaultFeatures,
+      // Add custom editor features if needed
+    ],
+  }),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -28,13 +87,41 @@ export default buildConfig({
     pool: {
       connectionString: process.env.POSTGRES_URL || '',
     },
+    push: process.env.NODE_ENV === 'development',
   }),
+  cors: [
+    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
+    'http://localhost:3000',
+    'https://localhost:3000',
+  ].filter(Boolean),
+  csrf: [
+    process.env.PAYLOAD_PUBLIC_SERVER_URL || '',
+    process.env.NEXT_PUBLIC_SERVER_URL || '',
+    'http://localhost:3000',
+    'https://localhost:3000',
+  ].filter(Boolean),
   plugins: [
     vercelBlobStorage({
       collections: {
-        media: true,
+        media: {
+          disablePayloadAccessControl: true,
+        },
       },
       token: process.env.BLOB_READ_WRITE_TOKEN || '',
     }),
   ],
+  upload: {
+    limits: {
+      fileSize: 20000000, // 20MB
+    },
+  },
+  graphQL: {
+    schemaOutputFile: path.resolve(dirname, 'generated-schema.graphql'),
+  },
+  localization: {
+    locales: ['en'],
+    defaultLocale: 'en',
+    fallback: true,
+  },
 })
