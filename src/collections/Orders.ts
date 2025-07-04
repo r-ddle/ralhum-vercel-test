@@ -80,7 +80,15 @@ export const Orders: CollectionConfig = {
       type: 'text',
       required: true,
       admin: {
-        description: 'Customer phone number for WhatsApp communication',
+        description: 'Customer primary phone number for WhatsApp communication',
+        placeholder: '+94 XX XXX XXXX',
+      },
+    },
+    {
+      name: 'customerSecondaryPhone',
+      type: 'text',
+      admin: {
+        description: 'Customer secondary phone number (optional)',
         placeholder: '+94 XX XXX XXXX',
       },
     },
@@ -602,6 +610,121 @@ export const Orders: CollectionConfig = {
               `Payment status changed: ${doc.orderNumber} ${previousDoc.paymentStatus} → ${doc.paymentStatus}`,
             )
           }
+        }
+
+        // Sync customer data when orders are created or updated
+        try {
+          // Check if customer exists
+          const existingCustomer = await req.payload.find({
+            collection: 'customers' as any,
+            where: {
+              email: {
+                equals: doc.customerEmail,
+              },
+            },
+          })
+
+          if (existingCustomer.docs.length === 0) {
+            // Create new customer record
+            const customerData = {
+              name: doc.customerName,
+              email: doc.customerEmail,
+              primaryPhone: doc.customerPhone,
+              secondaryPhone: doc.customerSecondaryPhone || null,
+              addresses: [
+                {
+                  type: 'home',
+                  address: doc.deliveryAddress,
+                  isDefault: true,
+                },
+              ],
+              status: 'active',
+              customerType: 'regular',
+            }
+
+            await req.payload.create({
+              collection: 'customers' as any,
+              data: customerData as any,
+            })
+
+            req.payload.logger.info(
+              `Customer auto-created: ${doc.customerName} (${doc.customerEmail})`,
+            )
+          } else {
+            // Update existing customer's secondary phone if provided
+            const customer = existingCustomer.docs[0]
+            if (doc.customerSecondaryPhone && !customer.secondaryPhone) {
+              await req.payload.update({
+                collection: 'customers' as any,
+                id: customer.id,
+                data: {
+                  secondaryPhone: doc.customerSecondaryPhone,
+                } as any,
+              })
+            }
+          }
+
+          // Update customer order statistics
+          const allOrders = await req.payload.find({
+            collection: 'orders',
+            where: {
+              customerEmail: {
+                equals: doc.customerEmail,
+              },
+            },
+          })
+
+          if (allOrders.docs.length > 0) {
+            const stats = {
+              totalOrders: allOrders.docs.length,
+              pendingOrders: allOrders.docs.filter((order: any) =>
+                ['pending', 'confirmed', 'processing'].includes(order.orderStatus),
+              ).length,
+              completedOrders: allOrders.docs.filter(
+                (order: any) => order.orderStatus === 'delivered',
+              ).length,
+              cancelledOrders: allOrders.docs.filter((order: any) =>
+                ['cancelled', 'refunded'].includes(order.orderStatus),
+              ).length,
+              totalSpent: allOrders.docs.reduce(
+                (sum: number, order: any) => sum + order.orderTotal,
+                0,
+              ),
+              averageOrderValue:
+                allOrders.docs.reduce((sum: number, order: any) => sum + order.orderTotal, 0) /
+                allOrders.docs.length,
+              lastOrderDate: allOrders.docs.sort(
+                (a: any, b: any) =>
+                  new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+              )[0].createdAt,
+              firstOrderDate: allOrders.docs.sort(
+                (a: any, b: any) =>
+                  new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+              )[0].createdAt,
+            }
+
+            // Find and update customer
+            const customerToUpdate = await req.payload.find({
+              collection: 'customers' as any,
+              where: {
+                email: {
+                  equals: doc.customerEmail,
+                },
+              },
+            })
+
+            if (customerToUpdate.docs.length > 0) {
+              await req.payload.update({
+                collection: 'customers' as any,
+                id: customerToUpdate.docs[0].id,
+                data: {
+                  orderStats: stats,
+                } as any,
+              })
+            }
+          }
+        } catch (error) {
+          req.payload.logger.error(`Failed to sync customer data: ${error}`)
         }
 
         // Alert on high-value orders

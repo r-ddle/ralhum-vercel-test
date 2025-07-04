@@ -73,8 +73,7 @@ export interface Config {
     brands: Brand;
     products: Product;
     orders: Order;
-    news: News;
-    'company-info': CompanyInfo;
+    customers: Customer;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -87,8 +86,7 @@ export interface Config {
     brands: BrandsSelect<false> | BrandsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     orders: OrdersSelect<false> | OrdersSelect<true>;
-    news: NewsSelect<false> | NewsSelect<true>;
-    'company-info': CompanyInfoSelect<false> | CompanyInfoSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -711,9 +709,13 @@ export interface Order {
    */
   customerEmail: string;
   /**
-   * Customer phone number for WhatsApp communication
+   * Customer primary phone number for WhatsApp communication
    */
   customerPhone: string;
+  /**
+   * Customer secondary phone number (optional)
+   */
+  customerSecondaryPhone?: string | null;
   /**
    * Complete delivery address
    */
@@ -846,370 +848,144 @@ export interface Order {
   createdAt: string;
 }
 /**
- * Manage news articles and blog posts
+ * Manage customer information and track order history with WhatsApp integration
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "news".
+ * via the `definition` "customers".
  */
-export interface News {
+export interface Customer {
   id: number;
   /**
-   * News article or blog post title
+   * Customer full name
    */
-  title: string;
+  name: string;
   /**
-   * URL-friendly version of the title
+   * Customer email address
    */
-  slug: string;
+  email: string;
   /**
-   * Main content of the article with rich formatting
+   * Primary phone number for WhatsApp communication
    */
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
+  primaryPhone: string;
   /**
-   * Brief summary or excerpt for article previews
+   * Secondary phone number (optional)
    */
-  excerpt?: string | null;
+  secondaryPhone?: string | null;
   /**
-   * Main image for the article (recommended: 1200x630px)
+   * Customer delivery addresses
    */
-  featuredImage: number | Media;
-  /**
-   * Article author
-   */
-  author: number | User;
-  /**
-   * When the article should be published
-   */
-  publishDate: string;
-  /**
-   * Publication status of the article
-   */
-  status: 'published' | 'draft' | 'scheduled' | 'archived';
-  /**
-   * Article category for organization
-   */
-  category:
-    | 'news'
-    | 'sports-updates'
-    | 'product-reviews'
-    | 'training-tips'
-    | 'events'
-    | 'company-news'
-    | 'industry-insights';
-  /**
-   * Article tags for search and filtering (comma separated)
-   */
-  tags?: string | null;
-  seo?: {
-    /**
-     * SEO title for the article page
-     */
-    title?: string | null;
-    /**
-     * SEO meta description for the article
-     */
-    description?: string | null;
-    /**
-     * SEO keywords separated by commas
-     */
-    keywords?: string | null;
-  };
-  settings?: {
-    /**
-     * Feature this article on homepage
-     */
-    isFeatured?: boolean | null;
-    /**
-     * Allow comments on this article
-     */
-    allowComments?: boolean | null;
-    /**
-     * Pin this article to the top of listings
-     */
-    isSticky?: boolean | null;
-    /**
-     * Estimated reading time in minutes (auto-calculated if empty)
-     */
-    readingTime?: number | null;
-  };
-  social?: {
-    /**
-     * Custom title for social media sharing
-     */
-    shareTitle?: string | null;
-    /**
-     * Custom description for social media sharing
-     */
-    shareDescription?: string | null;
-    /**
-     * Custom image for social media sharing (1200x630px recommended)
-     */
-    shareImage?: (number | null) | Media;
-  };
-  analytics?: {
-    /**
-     * Number of article views
-     */
-    viewCount?: number | null;
-    /**
-     * Number of social media shares
-     */
-    shareCount?: number | null;
-    /**
-     * Number of comments
-     */
-    commentCount?: number | null;
-  };
-  /**
-   * Related article IDs (comma separated)
-   */
-  relatedArticles?: string | null;
-  /**
-   * User who last modified this article
-   */
-  lastModifiedBy?: (number | null) | User;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * Manage company information sections (About Us, Contact, Terms, etc.)
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "company-info".
- */
-export interface CompanyInfo {
-  id: number;
-  /**
-   * Name of the company information section
-   */
-  sectionName: string;
-  /**
-   * URL-friendly version of the section name
-   */
-  slug: string;
-  /**
-   * Main content for this section with rich formatting
-   */
-  sectionContent: {
-    root: {
-      type: string;
-      children: {
-        type: string;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  /**
-   * Brief description or summary of this section
-   */
-  shortDescription?: string | null;
-  /**
-   * Images related to this section
-   */
-  sectionImages?:
+  addresses?:
     | {
-        image: number | Media;
+        type: 'home' | 'office' | 'other';
         /**
-         * Image caption or description
+         * Complete delivery address
          */
-        caption?: string | null;
+        address: string;
         /**
-         * Alternative text for accessibility
+         * Set as default delivery address
          */
-        altText?: string | null;
+        isDefault?: boolean | null;
         id?: string | null;
       }[]
     | null;
-  /**
-   * Type of company information section
-   */
-  sectionType:
-    | 'about'
-    | 'contact'
-    | 'terms'
-    | 'privacy'
-    | 'shipping'
-    | 'returns'
-    | 'faq'
-    | 'story'
-    | 'mission'
-    | 'team'
-    | 'careers'
-    | 'general';
-  /**
-   * Order for displaying sections (lower numbers appear first)
-   */
-  displayOrder: number;
-  /**
-   * Make this section visible on the website
-   */
-  isPublished: boolean;
-  /**
-   * Display link to this section in website footer
-   */
-  showInFooter?: boolean | null;
-  /**
-   * Display link to this section in main navigation
-   */
-  showInNavigation?: boolean | null;
-  contactDetails?: {
+  preferences?: {
     /**
-     * Primary phone number
+     * Preferred communication method
      */
-    phone?: string | null;
+    communicationMethod?: ('whatsapp' | 'email' | 'phone') | null;
     /**
-     * WhatsApp number
+     * Preferred language for communication
      */
-    whatsapp?: string | null;
+    language?: ('english' | 'sinhala' | 'tamil') | null;
     /**
-     * Primary email address
+     * Customer agrees to receive marketing communications
      */
-    email?: string | null;
-    /**
-     * Physical address
-     */
-    address?: string | null;
-    /**
-     * Business operating hours
-     */
-    businessHours?: string | null;
-    /**
-     * Google Maps embed code for location
-     */
-    mapEmbedCode?: string | null;
+    marketingOptIn?: boolean | null;
   };
+  whatsapp?: {
+    /**
+     * WhatsApp number is verified and active
+     */
+    isVerified?: boolean | null;
+    /**
+     * Date of last WhatsApp message sent
+     */
+    lastMessageSent?: string | null;
+    /**
+     * Date of last customer response
+     */
+    lastResponse?: string | null;
+    /**
+     * Brief history of WhatsApp communications
+     */
+    messageHistory?: string | null;
+  };
+  orderStats?: {
+    /**
+     * Total number of orders placed
+     */
+    totalOrders?: number | null;
+    /**
+     * Number of pending/processing orders
+     */
+    pendingOrders?: number | null;
+    /**
+     * Number of completed orders
+     */
+    completedOrders?: number | null;
+    /**
+     * Number of cancelled orders
+     */
+    cancelledOrders?: number | null;
+    /**
+     * Total amount spent (LKR)
+     */
+    totalSpent?: number | null;
+    /**
+     * Average order value (LKR)
+     */
+    averageOrderValue?: number | null;
+    /**
+     * Date of last order
+     */
+    lastOrderDate?: string | null;
+    /**
+     * Date of first order
+     */
+    firstOrderDate?: string | null;
+  };
+  /**
+   * Customer account status
+   */
+  status: 'active' | 'inactive' | 'vip' | 'blocked';
+  /**
+   * Customer type for special pricing or treatment
+   */
+  customerType?: ('regular' | 'vip' | 'wholesale' | 'corporate') | null;
+  /**
+   * Internal notes about this customer
+   */
+  notes?: string | null;
+  /**
+   * Customer tags (comma separated)
+   */
+  tags?: string | null;
   socialMedia?: {
     /**
-     * Facebook page URL
+     * Facebook profile URL
      */
     facebook?: string | null;
     /**
      * Instagram profile URL
      */
     instagram?: string | null;
-    /**
-     * Twitter profile URL
-     */
-    twitter?: string | null;
-    /**
-     * YouTube channel URL
-     */
-    youtube?: string | null;
-    /**
-     * LinkedIn company page URL
-     */
-    linkedin?: string | null;
   };
   /**
-   * Frequently asked questions
-   */
-  faqItems?:
-    | {
-        /**
-         * FAQ question
-         */
-        question: string;
-        /**
-         * FAQ answer with rich formatting
-         */
-        answer: {
-          root: {
-            type: string;
-            children: {
-              type: string;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        };
-        /**
-         * FAQ category
-         */
-        category?: ('general' | 'shipping' | 'returns' | 'payment' | 'products' | 'orders') | null;
-        /**
-         * Order within FAQ list
-         */
-        displayOrder?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  /**
-   * Team member information
-   */
-  teamMembers?:
-    | {
-        /**
-         * Team member name
-         */
-        name: string;
-        /**
-         * Job title or position
-         */
-        position?: string | null;
-        /**
-         * Brief biography or description
-         */
-        bio?: string | null;
-        /**
-         * Team member photo
-         */
-        photo?: (number | null) | Media;
-        /**
-         * Contact email (optional)
-         */
-        email?: string | null;
-        /**
-         * Order in team listing
-         */
-        displayOrder?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  seo?: {
-    /**
-     * SEO title for this section page
-     */
-    title?: string | null;
-    /**
-     * SEO meta description
-     */
-    description?: string | null;
-    /**
-     * SEO keywords separated by commas
-     */
-    keywords?: string | null;
-  };
-  /**
-   * User who created this section
+   * User who created this customer record
    */
   createdBy?: (number | null) | User;
   /**
-   * User who last modified this section
+   * User who last modified this customer record
    */
   lastModifiedBy?: (number | null) | User;
   updatedAt: string;
@@ -1247,12 +1023,8 @@ export interface PayloadLockedDocument {
         value: number | Order;
       } | null)
     | ({
-        relationTo: 'news';
-        value: number | News;
-      } | null)
-    | ({
-        relationTo: 'company-info';
-        value: number | CompanyInfo;
+        relationTo: 'customers';
+        value: number | Customer;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1566,6 +1338,7 @@ export interface OrdersSelect<T extends boolean = true> {
   customerName?: T;
   customerEmail?: T;
   customerPhone?: T;
+  customerSecondaryPhone?: T;
   deliveryAddress?: T;
   specialInstructions?: T;
   orderItems?:
@@ -1613,120 +1386,57 @@ export interface OrdersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "news_select".
+ * via the `definition` "customers_select".
  */
-export interface NewsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  content?: T;
-  excerpt?: T;
-  featuredImage?: T;
-  author?: T;
-  publishDate?: T;
-  status?: T;
-  category?: T;
-  tags?: T;
-  seo?:
+export interface CustomersSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  primaryPhone?: T;
+  secondaryPhone?: T;
+  addresses?:
     | T
     | {
-        title?: T;
-        description?: T;
-        keywords?: T;
-      };
-  settings?:
-    | T
-    | {
-        isFeatured?: T;
-        allowComments?: T;
-        isSticky?: T;
-        readingTime?: T;
-      };
-  social?:
-    | T
-    | {
-        shareTitle?: T;
-        shareDescription?: T;
-        shareImage?: T;
-      };
-  analytics?:
-    | T
-    | {
-        viewCount?: T;
-        shareCount?: T;
-        commentCount?: T;
-      };
-  relatedArticles?: T;
-  lastModifiedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "company-info_select".
- */
-export interface CompanyInfoSelect<T extends boolean = true> {
-  sectionName?: T;
-  slug?: T;
-  sectionContent?: T;
-  shortDescription?: T;
-  sectionImages?:
-    | T
-    | {
-        image?: T;
-        caption?: T;
-        altText?: T;
+        type?: T;
+        address?: T;
+        isDefault?: T;
         id?: T;
       };
-  sectionType?: T;
-  displayOrder?: T;
-  isPublished?: T;
-  showInFooter?: T;
-  showInNavigation?: T;
-  contactDetails?:
+  preferences?:
     | T
     | {
-        phone?: T;
-        whatsapp?: T;
-        email?: T;
-        address?: T;
-        businessHours?: T;
-        mapEmbedCode?: T;
+        communicationMethod?: T;
+        language?: T;
+        marketingOptIn?: T;
       };
+  whatsapp?:
+    | T
+    | {
+        isVerified?: T;
+        lastMessageSent?: T;
+        lastResponse?: T;
+        messageHistory?: T;
+      };
+  orderStats?:
+    | T
+    | {
+        totalOrders?: T;
+        pendingOrders?: T;
+        completedOrders?: T;
+        cancelledOrders?: T;
+        totalSpent?: T;
+        averageOrderValue?: T;
+        lastOrderDate?: T;
+        firstOrderDate?: T;
+      };
+  status?: T;
+  customerType?: T;
+  notes?: T;
+  tags?: T;
   socialMedia?:
     | T
     | {
         facebook?: T;
         instagram?: T;
-        twitter?: T;
-        youtube?: T;
-        linkedin?: T;
-      };
-  faqItems?:
-    | T
-    | {
-        question?: T;
-        answer?: T;
-        category?: T;
-        displayOrder?: T;
-        id?: T;
-      };
-  teamMembers?:
-    | T
-    | {
-        name?: T;
-        position?: T;
-        bio?: T;
-        photo?: T;
-        email?: T;
-        displayOrder?: T;
-        id?: T;
-      };
-  seo?:
-    | T
-    | {
-        title?: T;
-        description?: T;
-        keywords?: T;
       };
   createdBy?: T;
   lastModifiedBy?: T;

@@ -10,9 +10,8 @@ import { Media } from './collections/Media'
 import { Categories } from './collections/Categories'
 import { Brands } from './collections/Brands'
 import { Products } from './collections/Products'
-import { News } from './collections/News'
 import { Orders } from './collections/Orders'
-import { CompanyInfo } from './collections/CompanyInfo'
+import { Customers } from './collections/Customers'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -69,9 +68,7 @@ export default buildConfig({
     Products,
     // Business Operations
     Orders,
-    // Content Management
-    News,
-    CompanyInfo,
+    Customers,
   ],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [
