@@ -69,6 +69,12 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    categories: Category;
+    brands: Brand;
+    products: Product;
+    orders: Order;
+    news: News;
+    'company-info': CompanyInfo;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -77,6 +83,12 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    brands: BrandsSelect<false> | BrandsSelect<true>;
+    products: ProductsSelect<false> | ProductsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    news: NewsSelect<false> | NewsSelect<true>;
+    'company-info': CompanyInfoSelect<false> | CompanyInfoSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -86,7 +98,7 @@ export interface Config {
   };
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en';
   user: User & {
     collection: 'users';
   };
@@ -114,11 +126,40 @@ export interface UserAuthOperations {
   };
 }
 /**
+ * Manage user accounts and permissions
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: number;
+  firstName: string;
+  lastName: string;
+  phone?: string | null;
+  /**
+   * Upload a profile picture
+   */
+  profileImage?: (number | null) | Media;
+  /**
+   * User role determines access permissions
+   */
+  role?: ('super-admin' | 'admin' | 'product-manager' | 'content-editor') | null;
+  /**
+   * Deactivate user to prevent login without deleting account
+   */
+  isActive?: boolean | null;
+  /**
+   * Last successful login timestamp
+   */
+  lastLogin?: string | null;
+  /**
+   * User department for organizational purposes
+   */
+  department?: ('management' | 'products' | 'content' | 'customer-service' | 'marketing') | null;
+  /**
+   * Internal notes about this user (only visible to super admins)
+   */
+  notes?: string | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -126,6 +167,9 @@ export interface User {
   resetPasswordExpiration?: string | null;
   salt?: string | null;
   hash?: string | null;
+  /**
+   * Number of failed login attempts
+   */
   loginAttempts?: number | null;
   lockUntil?: string | null;
   sessions?:
@@ -138,12 +182,65 @@ export interface User {
   password?: string | null;
 }
 /**
+ * Manage all uploaded media files with organized categorization
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
   id: number;
+  /**
+   * Alt text for accessibility - describe what the image shows
+   */
   alt: string;
+  /**
+   * Categorize media for better organization
+   */
+  category: 'products' | 'news' | 'company' | 'brands' | 'profiles' | 'general' | 'marketing';
+  /**
+   * Optional caption for the media
+   */
+  caption?: string | null;
+  /**
+   * Tags separated by commas for easier searching
+   */
+  tags?: string | null;
+  /**
+   * Make this media accessible on the public website
+   */
+  isPublic?: boolean | null;
+  /**
+   * Mark as featured content for homepage/banners
+   */
+  isFeature?: boolean | null;
+  /**
+   * SEO title for this media (for images used as page headers)
+   */
+  seoTitle?: string | null;
+  /**
+   * SEO description for this media
+   */
+  seoDescription?: string | null;
+  /**
+   * Internal notes about usage rights, source, or restrictions
+   */
+  usageNotes?: string | null;
+  /**
+   * Source of the media (photographer, designer, stock photo, etc.)
+   */
+  source?: string | null;
+  /**
+   * Copyright information
+   */
+  copyright?: string | null;
+  /**
+   * User who uploaded this media
+   */
+  uploadedBy?: (number | null) | User;
+  /**
+   * User who last modified this media
+   */
+  lastModifiedBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -155,6 +252,968 @@ export interface Media {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    card?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    tablet?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    desktop?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * Manage product categories for organization and navigation
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories".
+ */
+export interface Category {
+  id: number;
+  /**
+   * Category name - must be unique
+   */
+  name: string;
+  /**
+   * URL-friendly version of the category name
+   */
+  slug: string;
+  /**
+   * Brief description of the category
+   */
+  description?: string | null;
+  /**
+   * Category banner or representative image
+   */
+  image?: (number | null) | Media;
+  /**
+   * Icon class or Unicode for category display (optional)
+   */
+  icon?: string | null;
+  /**
+   * Category visibility status
+   */
+  status: 'active' | 'inactive' | 'draft';
+  /**
+   * Order for displaying categories (lower numbers appear first)
+   */
+  displayOrder: number;
+  /**
+   * Parent category ID for hierarchical organization (optional)
+   */
+  parentCategory?: string | null;
+  /**
+   * Feature this category on homepage or in navigation
+   */
+  isFeature?: boolean | null;
+  /**
+   * Display this category in main navigation menu
+   */
+  showInNavigation?: boolean | null;
+  seo?: {
+    /**
+     * SEO title for category page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description for category page
+     */
+    description?: string | null;
+    /**
+     * SEO keywords separated by commas
+     */
+    keywords?: string | null;
+  };
+  config?: {
+    /**
+     * Allow products to be assigned to this category
+     */
+    allowProducts?: boolean | null;
+    /**
+     * Products in this category require size selection
+     */
+    requiresSize?: boolean | null;
+    /**
+     * Products in this category require color selection
+     */
+    requiresColor?: boolean | null;
+    /**
+     * JSON configuration for category-specific product fields
+     */
+    customFields?: string | null;
+  };
+  /**
+   * Number of active products in this category
+   */
+  productCount?: number | null;
+  /**
+   * User who created this category
+   */
+  createdBy?: (number | null) | User;
+  /**
+   * User who last modified this category
+   */
+  lastModifiedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage brand information for products
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brands".
+ */
+export interface Brand {
+  id: number;
+  /**
+   * Brand name - must be unique
+   */
+  name: string;
+  /**
+   * URL-friendly version of the brand name
+   */
+  slug: string;
+  /**
+   * Brand description and background information
+   */
+  description?: string | null;
+  /**
+   * Brand logo - preferably square format with transparent background
+   */
+  logo: number | Media;
+  /**
+   * Official brand website URL
+   */
+  website?: string | null;
+  /**
+   * Country where the brand originates
+   */
+  countryOfOrigin?: string | null;
+  /**
+   * Year the brand was founded
+   */
+  foundedYear?: number | null;
+  /**
+   * Brand availability status
+   */
+  status: 'active' | 'inactive' | 'discontinued';
+  /**
+   * Feature this brand on homepage or in navigation
+   */
+  isFeatured?: boolean | null;
+  /**
+   * Mark as premium/luxury brand
+   */
+  isPremium?: boolean | null;
+  contact?: {
+    /**
+     * Brand contact email
+     */
+    email?: string | null;
+    /**
+     * Brand contact phone number
+     */
+    phone?: string | null;
+    /**
+     * Brand headquarters address
+     */
+    address?: string | null;
+  };
+  social?: {
+    /**
+     * Facebook page URL
+     */
+    facebook?: string | null;
+    /**
+     * Instagram profile URL
+     */
+    instagram?: string | null;
+    /**
+     * Twitter profile URL
+     */
+    twitter?: string | null;
+    /**
+     * YouTube channel URL
+     */
+    youtube?: string | null;
+  };
+  seo?: {
+    /**
+     * SEO title for brand page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description for brand page
+     */
+    description?: string | null;
+    /**
+     * SEO keywords separated by commas
+     */
+    keywords?: string | null;
+  };
+  /**
+   * What the brand specializes in
+   */
+  specialties?: string | null;
+  /**
+   * General price range for this brand
+   */
+  priceRange?: ('budget' | 'mid-range' | 'premium' | 'luxury') | null;
+  /**
+   * Primary target audience
+   */
+  targetAudience?: string | null;
+  /**
+   * Number of active products from this brand
+   */
+  productCount?: number | null;
+  /**
+   * User who created this brand
+   */
+  createdBy?: (number | null) | User;
+  /**
+   * User who last modified this brand
+   */
+  lastModifiedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage product catalog with comprehensive details
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products".
+ */
+export interface Product {
+  id: number;
+  /**
+   * Product name as displayed to customers
+   */
+  name: string;
+  /**
+   * URL-friendly version of the product name
+   */
+  slug: string;
+  /**
+   * Product category for organization
+   */
+  category: number | Category;
+  /**
+   * Product brand
+   */
+  brand: number | Brand;
+  /**
+   * Product price in LKR
+   */
+  price: number;
+  /**
+   * Stock Keeping Unit - unique product identifier
+   */
+  sku: string;
+  /**
+   * Available stock quantity
+   */
+  stock: number;
+  /**
+   * Product images (first image will be the main image)
+   */
+  images: {
+    image: number | Media;
+    /**
+     * Alternative text for this specific image
+     */
+    altText?: string | null;
+    id?: string | null;
+  }[];
+  /**
+   * Product availability status
+   */
+  status: 'active' | 'inactive' | 'draft' | 'out-of-stock' | 'discontinued';
+  /**
+   * Available sizes (comma separated)
+   */
+  sizes?: string | null;
+  /**
+   * Available colors (comma separated)
+   */
+  colors?: string | null;
+  /**
+   * Detailed product description with rich formatting
+   */
+  description?: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  seo?: {
+    /**
+     * SEO title for product page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description for product page
+     */
+    description?: string | null;
+  };
+  specifications?: {
+    /**
+     * Primary material used
+     */
+    material?: string | null;
+    /**
+     * Product weight
+     */
+    weight?: string | null;
+    /**
+     * Product dimensions
+     */
+    dimensions?: string | null;
+    /**
+     * Care and maintenance instructions
+     */
+    careInstructions?: string | null;
+  };
+  shipping?: {
+    /**
+     * Offer free shipping for this product
+     */
+    freeShipping?: boolean | null;
+    /**
+     * Available for island-wide delivery
+     */
+    islandWideDelivery?: boolean | null;
+    /**
+     * Eligible for easy return policy
+     */
+    easyReturn?: boolean | null;
+    /**
+     * Shipping weight in kg
+     */
+    shippingWeight?: number | null;
+  };
+  pricing?: {
+    /**
+     * Original price (for displaying discounts)
+     */
+    originalPrice?: number | null;
+    /**
+     * Cost price for profit calculations (admin only)
+     */
+    costPrice?: number | null;
+    /**
+     * Alert when stock falls below this number
+     */
+    lowStockThreshold?: number | null;
+    /**
+     * Track inventory for this product
+     */
+    trackInventory?: boolean | null;
+  };
+  /**
+   * Key product features and selling points
+   */
+  features?:
+    | {
+        feature: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Product tags for search and filtering (comma separated)
+   */
+  tags?: string | null;
+  /**
+   * Related product IDs (comma separated)
+   */
+  relatedProducts?: string | null;
+  analytics?: {
+    /**
+     * Number of product page views
+     */
+    viewCount?: number | null;
+    /**
+     * Number of times ordered
+     */
+    orderCount?: number | null;
+    /**
+     * Average customer rating (1-5)
+     */
+    rating?: number | null;
+    /**
+     * Number of customer reviews
+     */
+    reviewCount?: number | null;
+  };
+  /**
+   * User who created this product
+   */
+  createdBy?: (number | null) | User;
+  /**
+   * User who last modified this product
+   */
+  lastModifiedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage customer orders and WhatsApp integration tracking
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  /**
+   * Unique order identifier
+   */
+  orderNumber: string;
+  /**
+   * Customer full name
+   */
+  customerName: string;
+  /**
+   * Customer email address
+   */
+  customerEmail: string;
+  /**
+   * Customer phone number for WhatsApp communication
+   */
+  customerPhone: string;
+  /**
+   * Complete delivery address
+   */
+  deliveryAddress: string;
+  /**
+   * Special delivery instructions or customer notes
+   */
+  specialInstructions?: string | null;
+  /**
+   * Products in this order
+   */
+  orderItems: {
+    /**
+     * Product ID reference
+     */
+    productId: string;
+    /**
+     * Product name (for record keeping)
+     */
+    productName: string;
+    /**
+     * Product SKU (for record keeping)
+     */
+    productSku: string;
+    /**
+     * Price per unit in LKR
+     */
+    unitPrice: number;
+    /**
+     * Quantity ordered
+     */
+    quantity: number;
+    /**
+     * Selected size (if applicable)
+     */
+    selectedSize?: string | null;
+    /**
+     * Selected color (if applicable)
+     */
+    selectedColor?: string | null;
+    /**
+     * Subtotal for this item (unit price × quantity)
+     */
+    subtotal: number;
+    id?: string | null;
+  }[];
+  /**
+   * Order subtotal (before shipping and taxes)
+   */
+  orderSubtotal: number;
+  /**
+   * Shipping cost in LKR
+   */
+  shippingCost?: number | null;
+  /**
+   * Discount amount in LKR
+   */
+  discount?: number | null;
+  /**
+   * Final order total
+   */
+  orderTotal: number;
+  /**
+   * Current order status
+   */
+  orderStatus: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
+  /**
+   * Payment status
+   */
+  paymentStatus: 'pending' | 'paid' | 'partially-paid' | 'refunded' | 'failed';
+  /**
+   * Payment method chosen by customer
+   */
+  paymentMethod?: ('cod' | 'bank-transfer' | 'online-payment' | 'card-payment') | null;
+  whatsapp?: {
+    /**
+     * WhatsApp confirmation message sent to customer
+     */
+    messageSent?: boolean | null;
+    /**
+     * When the WhatsApp message was sent
+     */
+    messageTimestamp?: string | null;
+    /**
+     * WhatsApp message template used
+     */
+    messageTemplate?:
+      | ('order-confirmation' | 'order-update' | 'shipping-notification' | 'delivery-confirmation')
+      | null;
+    /**
+     * Customer response or feedback via WhatsApp
+     */
+    customerResponse?: string | null;
+  };
+  shipping?: {
+    /**
+     * Shipping tracking number
+     */
+    trackingNumber?: string | null;
+    /**
+     * Courier service used for delivery
+     */
+    courier?: ('pronto' | 'kapruka' | 'dhl' | 'fedex' | 'local' | 'pickup') | null;
+    /**
+     * Estimated delivery date
+     */
+    estimatedDelivery?: string | null;
+    /**
+     * Actual delivery date
+     */
+    actualDelivery?: string | null;
+  };
+  /**
+   * Internal notes for team reference (not visible to customer)
+   */
+  internalNotes?: string | null;
+  /**
+   * How the customer placed this order
+   */
+  orderSource?: ('website' | 'whatsapp' | 'phone' | 'store' | 'social') | null;
+  /**
+   * User who created this order
+   */
+  createdBy?: (number | null) | User;
+  /**
+   * User who last modified this order
+   */
+  lastModifiedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage news articles and blog posts
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news".
+ */
+export interface News {
+  id: number;
+  /**
+   * News article or blog post title
+   */
+  title: string;
+  /**
+   * URL-friendly version of the title
+   */
+  slug: string;
+  /**
+   * Main content of the article with rich formatting
+   */
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Brief summary or excerpt for article previews
+   */
+  excerpt?: string | null;
+  /**
+   * Main image for the article (recommended: 1200x630px)
+   */
+  featuredImage: number | Media;
+  /**
+   * Article author
+   */
+  author: number | User;
+  /**
+   * When the article should be published
+   */
+  publishDate: string;
+  /**
+   * Publication status of the article
+   */
+  status: 'published' | 'draft' | 'scheduled' | 'archived';
+  /**
+   * Article category for organization
+   */
+  category:
+    | 'news'
+    | 'sports-updates'
+    | 'product-reviews'
+    | 'training-tips'
+    | 'events'
+    | 'company-news'
+    | 'industry-insights';
+  /**
+   * Article tags for search and filtering (comma separated)
+   */
+  tags?: string | null;
+  seo?: {
+    /**
+     * SEO title for the article page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description for the article
+     */
+    description?: string | null;
+    /**
+     * SEO keywords separated by commas
+     */
+    keywords?: string | null;
+  };
+  settings?: {
+    /**
+     * Feature this article on homepage
+     */
+    isFeatured?: boolean | null;
+    /**
+     * Allow comments on this article
+     */
+    allowComments?: boolean | null;
+    /**
+     * Pin this article to the top of listings
+     */
+    isSticky?: boolean | null;
+    /**
+     * Estimated reading time in minutes (auto-calculated if empty)
+     */
+    readingTime?: number | null;
+  };
+  social?: {
+    /**
+     * Custom title for social media sharing
+     */
+    shareTitle?: string | null;
+    /**
+     * Custom description for social media sharing
+     */
+    shareDescription?: string | null;
+    /**
+     * Custom image for social media sharing (1200x630px recommended)
+     */
+    shareImage?: (number | null) | Media;
+  };
+  analytics?: {
+    /**
+     * Number of article views
+     */
+    viewCount?: number | null;
+    /**
+     * Number of social media shares
+     */
+    shareCount?: number | null;
+    /**
+     * Number of comments
+     */
+    commentCount?: number | null;
+  };
+  /**
+   * Related article IDs (comma separated)
+   */
+  relatedArticles?: string | null;
+  /**
+   * User who last modified this article
+   */
+  lastModifiedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * Manage company information sections (About Us, Contact, Terms, etc.)
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "company-info".
+ */
+export interface CompanyInfo {
+  id: number;
+  /**
+   * Name of the company information section
+   */
+  sectionName: string;
+  /**
+   * URL-friendly version of the section name
+   */
+  slug: string;
+  /**
+   * Main content for this section with rich formatting
+   */
+  sectionContent: {
+    root: {
+      type: string;
+      children: {
+        type: string;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  /**
+   * Brief description or summary of this section
+   */
+  shortDescription?: string | null;
+  /**
+   * Images related to this section
+   */
+  sectionImages?:
+    | {
+        image: number | Media;
+        /**
+         * Image caption or description
+         */
+        caption?: string | null;
+        /**
+         * Alternative text for accessibility
+         */
+        altText?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Type of company information section
+   */
+  sectionType:
+    | 'about'
+    | 'contact'
+    | 'terms'
+    | 'privacy'
+    | 'shipping'
+    | 'returns'
+    | 'faq'
+    | 'story'
+    | 'mission'
+    | 'team'
+    | 'careers'
+    | 'general';
+  /**
+   * Order for displaying sections (lower numbers appear first)
+   */
+  displayOrder: number;
+  /**
+   * Make this section visible on the website
+   */
+  isPublished: boolean;
+  /**
+   * Display link to this section in website footer
+   */
+  showInFooter?: boolean | null;
+  /**
+   * Display link to this section in main navigation
+   */
+  showInNavigation?: boolean | null;
+  contactDetails?: {
+    /**
+     * Primary phone number
+     */
+    phone?: string | null;
+    /**
+     * WhatsApp number
+     */
+    whatsapp?: string | null;
+    /**
+     * Primary email address
+     */
+    email?: string | null;
+    /**
+     * Physical address
+     */
+    address?: string | null;
+    /**
+     * Business operating hours
+     */
+    businessHours?: string | null;
+    /**
+     * Google Maps embed code for location
+     */
+    mapEmbedCode?: string | null;
+  };
+  socialMedia?: {
+    /**
+     * Facebook page URL
+     */
+    facebook?: string | null;
+    /**
+     * Instagram profile URL
+     */
+    instagram?: string | null;
+    /**
+     * Twitter profile URL
+     */
+    twitter?: string | null;
+    /**
+     * YouTube channel URL
+     */
+    youtube?: string | null;
+    /**
+     * LinkedIn company page URL
+     */
+    linkedin?: string | null;
+  };
+  /**
+   * Frequently asked questions
+   */
+  faqItems?:
+    | {
+        /**
+         * FAQ question
+         */
+        question: string;
+        /**
+         * FAQ answer with rich formatting
+         */
+        answer: {
+          root: {
+            type: string;
+            children: {
+              type: string;
+              version: number;
+              [k: string]: unknown;
+            }[];
+            direction: ('ltr' | 'rtl') | null;
+            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+            indent: number;
+            version: number;
+          };
+          [k: string]: unknown;
+        };
+        /**
+         * FAQ category
+         */
+        category?: ('general' | 'shipping' | 'returns' | 'payment' | 'products' | 'orders') | null;
+        /**
+         * Order within FAQ list
+         */
+        displayOrder?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Team member information
+   */
+  teamMembers?:
+    | {
+        /**
+         * Team member name
+         */
+        name: string;
+        /**
+         * Job title or position
+         */
+        position?: string | null;
+        /**
+         * Brief biography or description
+         */
+        bio?: string | null;
+        /**
+         * Team member photo
+         */
+        photo?: (number | null) | Media;
+        /**
+         * Contact email (optional)
+         */
+        email?: string | null;
+        /**
+         * Order in team listing
+         */
+        displayOrder?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  seo?: {
+    /**
+     * SEO title for this section page
+     */
+    title?: string | null;
+    /**
+     * SEO meta description
+     */
+    description?: string | null;
+    /**
+     * SEO keywords separated by commas
+     */
+    keywords?: string | null;
+  };
+  /**
+   * User who created this section
+   */
+  createdBy?: (number | null) | User;
+  /**
+   * User who last modified this section
+   */
+  lastModifiedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -170,6 +1229,30 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: number | Media;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'brands';
+        value: number | Brand;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'news';
+        value: number | News;
+      } | null)
+    | ({
+        relationTo: 'company-info';
+        value: number | CompanyInfo;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -218,6 +1301,15 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  firstName?: T;
+  lastName?: T;
+  phone?: T;
+  profileImage?: T;
+  role?: T;
+  isActive?: T;
+  lastLogin?: T;
+  department?: T;
+  notes?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -241,6 +1333,18 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  category?: T;
+  caption?: T;
+  tags?: T;
+  isPublic?: T;
+  isFeature?: T;
+  seoTitle?: T;
+  seoDescription?: T;
+  usageNotes?: T;
+  source?: T;
+  copyright?: T;
+  uploadedBy?: T;
+  lastModifiedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -252,6 +1356,382 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        card?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        tablet?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        desktop?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_select".
+ */
+export interface CategoriesSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  image?: T;
+  icon?: T;
+  status?: T;
+  displayOrder?: T;
+  parentCategory?: T;
+  isFeature?: T;
+  showInNavigation?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+      };
+  config?:
+    | T
+    | {
+        allowProducts?: T;
+        requiresSize?: T;
+        requiresColor?: T;
+        customFields?: T;
+      };
+  productCount?: T;
+  createdBy?: T;
+  lastModifiedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "brands_select".
+ */
+export interface BrandsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  description?: T;
+  logo?: T;
+  website?: T;
+  countryOfOrigin?: T;
+  foundedYear?: T;
+  status?: T;
+  isFeatured?: T;
+  isPremium?: T;
+  contact?:
+    | T
+    | {
+        email?: T;
+        phone?: T;
+        address?: T;
+      };
+  social?:
+    | T
+    | {
+        facebook?: T;
+        instagram?: T;
+        twitter?: T;
+        youtube?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+      };
+  specialties?: T;
+  priceRange?: T;
+  targetAudience?: T;
+  productCount?: T;
+  createdBy?: T;
+  lastModifiedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_select".
+ */
+export interface ProductsSelect<T extends boolean = true> {
+  name?: T;
+  slug?: T;
+  category?: T;
+  brand?: T;
+  price?: T;
+  sku?: T;
+  stock?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        altText?: T;
+        id?: T;
+      };
+  status?: T;
+  sizes?: T;
+  colors?: T;
+  description?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  specifications?:
+    | T
+    | {
+        material?: T;
+        weight?: T;
+        dimensions?: T;
+        careInstructions?: T;
+      };
+  shipping?:
+    | T
+    | {
+        freeShipping?: T;
+        islandWideDelivery?: T;
+        easyReturn?: T;
+        shippingWeight?: T;
+      };
+  pricing?:
+    | T
+    | {
+        originalPrice?: T;
+        costPrice?: T;
+        lowStockThreshold?: T;
+        trackInventory?: T;
+      };
+  features?:
+    | T
+    | {
+        feature?: T;
+        id?: T;
+      };
+  tags?: T;
+  relatedProducts?: T;
+  analytics?:
+    | T
+    | {
+        viewCount?: T;
+        orderCount?: T;
+        rating?: T;
+        reviewCount?: T;
+      };
+  createdBy?: T;
+  lastModifiedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  customerName?: T;
+  customerEmail?: T;
+  customerPhone?: T;
+  deliveryAddress?: T;
+  specialInstructions?: T;
+  orderItems?:
+    | T
+    | {
+        productId?: T;
+        productName?: T;
+        productSku?: T;
+        unitPrice?: T;
+        quantity?: T;
+        selectedSize?: T;
+        selectedColor?: T;
+        subtotal?: T;
+        id?: T;
+      };
+  orderSubtotal?: T;
+  shippingCost?: T;
+  discount?: T;
+  orderTotal?: T;
+  orderStatus?: T;
+  paymentStatus?: T;
+  paymentMethod?: T;
+  whatsapp?:
+    | T
+    | {
+        messageSent?: T;
+        messageTimestamp?: T;
+        messageTemplate?: T;
+        customerResponse?: T;
+      };
+  shipping?:
+    | T
+    | {
+        trackingNumber?: T;
+        courier?: T;
+        estimatedDelivery?: T;
+        actualDelivery?: T;
+      };
+  internalNotes?: T;
+  orderSource?: T;
+  createdBy?: T;
+  lastModifiedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "news_select".
+ */
+export interface NewsSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  excerpt?: T;
+  featuredImage?: T;
+  author?: T;
+  publishDate?: T;
+  status?: T;
+  category?: T;
+  tags?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+      };
+  settings?:
+    | T
+    | {
+        isFeatured?: T;
+        allowComments?: T;
+        isSticky?: T;
+        readingTime?: T;
+      };
+  social?:
+    | T
+    | {
+        shareTitle?: T;
+        shareDescription?: T;
+        shareImage?: T;
+      };
+  analytics?:
+    | T
+    | {
+        viewCount?: T;
+        shareCount?: T;
+        commentCount?: T;
+      };
+  relatedArticles?: T;
+  lastModifiedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "company-info_select".
+ */
+export interface CompanyInfoSelect<T extends boolean = true> {
+  sectionName?: T;
+  slug?: T;
+  sectionContent?: T;
+  shortDescription?: T;
+  sectionImages?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        altText?: T;
+        id?: T;
+      };
+  sectionType?: T;
+  displayOrder?: T;
+  isPublished?: T;
+  showInFooter?: T;
+  showInNavigation?: T;
+  contactDetails?:
+    | T
+    | {
+        phone?: T;
+        whatsapp?: T;
+        email?: T;
+        address?: T;
+        businessHours?: T;
+        mapEmbedCode?: T;
+      };
+  socialMedia?:
+    | T
+    | {
+        facebook?: T;
+        instagram?: T;
+        twitter?: T;
+        youtube?: T;
+        linkedin?: T;
+      };
+  faqItems?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        category?: T;
+        displayOrder?: T;
+        id?: T;
+      };
+  teamMembers?:
+    | T
+    | {
+        name?: T;
+        position?: T;
+        bio?: T;
+        photo?: T;
+        email?: T;
+        displayOrder?: T;
+        id?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        keywords?: T;
+      };
+  createdBy?: T;
+  lastModifiedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
