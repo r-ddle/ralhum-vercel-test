@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
       const updateData: any = {}
 
       if (name && name !== customer.name) updateData.name = name
-      if (phone && phone !== customer.primaryPhone) updateData.primaryPhone = phone
+      if (phone && phone !== customer.primaryPhone) updateData.primaryPhone = phone // ✅ Use primaryPhone
       if (secondaryPhone && secondaryPhone !== customer.secondaryPhone)
         updateData.secondaryPhone = secondaryPhone
 
@@ -44,7 +44,8 @@ export async function POST(request: NextRequest) {
         const addresses = customer.addresses || []
         const addressExists = addresses.some(
           (addr: any) =>
-            addr.address === address.street + ', ' + address.city + ', ' + address.postalCode,
+            addr.address ===
+            `${address.street}, ${address.city}, ${address.postalCode}, ${address.province}`, // ✅ Match the full address format
         )
 
         if (!addressExists) {

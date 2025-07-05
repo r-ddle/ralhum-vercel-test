@@ -1,114 +1,226 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import configPromise from '@/payload.config'
+import { getPayload } from 'payload'
+import config from '@payload-config'
+import { OrderInput } from '@/types/api'
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = await getPayloadHMR({ config: configPromise })
-    const data = await request.json()
+    const orderData: OrderInput = await request.json()
 
-    const { orderId, customer, items, pricing, specialInstructions, orderSource = 'website' } = data
+    const payload = await getPayload({ config })
 
-    // First, create/update customer
-    const customerResponse = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/customers`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: customer.fullName,
-        email: customer.email,
-        phone: customer.phone,
-        address: customer.address,
-        preferredLanguage: customer.preferredLanguage || 'english',
-        marketingOptIn: customer.marketingOptIn !== false,
-      }),
-    })
+    // Create or update customer first
+    let customer
+    try {
+      // Try to find existing customer by email
+      const existingCustomer = await payload.find({
+        collection: 'customers',
+        where: {
+          email: {
+            equals: orderData.customer.email,
+          },
+        },
+        limit: 1,
+      })
 
-    const customerData = await customerResponse.json()
-
-    if (!customerData.success) {
-      throw new Error('Failed to create/update customer')
+      if (existingCustomer.docs.length > 0) {
+        // Update existing customer
+        customer = await payload.update({
+          collection: 'customers',
+          id: existingCustomer.docs[0].id,
+          data: {
+            name: orderData.customer.fullName,
+            email: orderData.customer.email,
+            primaryPhone: orderData.customer.phone, // ✅ Correct field name
+            secondaryPhone: orderData.customer.secondaryPhone,
+            addresses: orderData.customer.address
+              ? [
+                  // ✅ Correct structure (array)
+                  {
+                    type: 'home',
+                    address: `${orderData.customer.address.street}, ${orderData.customer.address.city}, ${orderData.customer.address.postalCode}, ${orderData.customer.address.province}`,
+                    isDefault: true,
+                  },
+                ]
+              : [],
+            preferences: {
+              // ✅ Correct nested structure
+              communicationMethod: 'whatsapp',
+              marketingOptIn: orderData.customer.marketingOptIn || false,
+            },
+            whatsapp: {
+              isVerified: false,
+            },
+            status: 'active',
+            customerType: 'regular',
+          },
+        })
+      } else {
+        // Create new customer
+        customer = await payload.create({
+          collection: 'customers',
+          data: {
+            name: orderData.customer.fullName,
+            email: orderData.customer.email,
+            primaryPhone: orderData.customer.phone, // ✅ Correct field name
+            secondaryPhone: orderData.customer.secondaryPhone,
+            addresses: orderData.customer.address
+              ? [
+                  // ✅ Correct structure (array)
+                  {
+                    type: 'home',
+                    address: `${orderData.customer.address.street}, ${orderData.customer.address.city}, ${orderData.customer.address.postalCode}, ${orderData.customer.address.province}`,
+                    isDefault: true,
+                  },
+                ]
+              : [],
+            preferences: {
+              // ✅ Correct nested structure
+              communicationMethod: 'whatsapp',
+              marketingOptIn: orderData.customer.marketingOptIn || false,
+            },
+            whatsapp: {
+              isVerified: false,
+            },
+            status: 'active',
+            customerType: 'regular',
+          },
+        })
+      }
+    } catch (customerError) {
+      console.error('Error creating/updating customer:', customerError)
+      return NextResponse.json(
+        { success: false, error: 'Failed to create customer' },
+        { status: 500 },
+      )
     }
 
-    // Create order items array
-    const orderItems = items.map((item: any) => ({
-      productId: item.product.id || item.id,
-      productName: item.product.title || item.product.name,
-      productSku: item.product.sku || item.sku,
-      unitPrice: item.variant?.price || item.price,
-      quantity: item.quantity,
-      selectedSize: item.variant?.size || item.size,
-      selectedColor: item.variant?.color || item.color,
-      subtotal: (item.variant?.price || item.price) * item.quantity,
-    }))
-
     // Create order
-    const order = await payload.create({
-      collection: 'orders',
-      data: {
-        orderNumber: orderId,
-        customerName: customer.fullName,
-        customerEmail: customer.email,
-        customerPhone: customer.phone,
-        customerSecondaryPhone: customer.secondaryPhone,
-        deliveryAddress: `${customer.address.street}, ${customer.address.city}, ${customer.address.postalCode}, ${customer.address.province}`,
-        specialInstructions,
-        orderItems,
-        orderSubtotal: pricing.subtotal,
-        shippingCost: pricing.shipping,
-        discount: pricing.discount || 0,
-        orderTotal: pricing.total,
-        orderStatus: 'pending',
-        paymentStatus: 'pending',
-        paymentMethod: 'cod', // Default to COD for WhatsApp orders
-        whatsapp: {
-          messageSent: false,
-          messageTemplate: 'order-confirmation',
+    try {
+      const order = await payload.create({
+        collection: 'orders',
+        data: {
+          // Basic order info
+          customerName: orderData.customer.fullName,
+          customerEmail: orderData.customer.email,
+          customerPhone: orderData.customer.phone,
+          customerSecondaryPhone: orderData.customer.secondaryPhone,
+          deliveryAddress: `${orderData.customer.address.street}, ${orderData.customer.address.city}, ${orderData.customer.address.postalCode}, ${orderData.customer.address.province}`,
+          specialInstructions: orderData.specialInstructions,
+
+          // Order items array
+          orderItems: orderData.items.map((item) => ({
+            productId: item.product.id || 'unknown',
+            productName: item.product.title || item.product.name || 'Unknown Product',
+            productSku: item.product.sku || 'unknown',
+            unitPrice: item.variant?.price || item.price || 0,
+            quantity: item.quantity,
+            selectedSize: item.variant?.size || item.size,
+            selectedColor: item.variant?.color || item.color,
+            subtotal: (item.variant?.price || item.price || 0) * item.quantity,
+          })),
+
+          // Pricing totals
+          orderSubtotal: orderData.pricing.subtotal,
+          shippingCost: orderData.pricing.shipping || 0,
+          discount: 0,
+          orderTotal: orderData.pricing.total,
+
+          // Status fields
+          orderStatus: 'pending',
+          paymentStatus: 'pending',
+          paymentMethod: 'cod', // Default to cash on delivery
+
+          // Source
+          orderSource: orderData.orderSource || 'website',
+
+          // WhatsApp integration
+          whatsapp: {
+            messageSent: false,
+            messageTemplate: 'order-confirmation',
+          },
         },
-        orderSource,
+      })
+
+      // Return success response
+      return NextResponse.json({
+        success: true,
+        data: {
+          orderId: order.orderNumber, // ✅ Use orderNumber (auto-generated field)
+          id: order.id,
+          status: order.orderStatus, // ✅ Use orderStatus field
+          total: order.orderTotal, // ✅ Use orderTotal field
+          currency: 'LKR', // ✅ Use hardcoded currency or store it separately
+          createdAt: order.createdAt,
+        },
+      })
+    } catch (orderError) {
+      console.error('Error creating order:', orderError)
+      return NextResponse.json({ success: false, error: 'Failed to create order' }, { status: 500 })
+    }
+  } catch (error) {
+    console.error('Orders API error:', error)
+    return NextResponse.json({ success: false, error: 'Invalid request data' }, { status: 400 })
+  }
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const orderId = searchParams.get('orderId')
+    const email = searchParams.get('email')
+    const phone = searchParams.get('phone')
+
+    if (!orderId) {
+      return NextResponse.json({ success: false, error: 'Order ID is required' }, { status: 400 })
+    }
+
+    const payload = await getPayload({ config })
+
+    // Build where conditions
+    const whereConditions: any = {
+      orderId: {
+        equals: orderId,
       },
-    })
+    }
 
-    // Update product analytics (order count)
-    for (const item of items) {
-      try {
-        const productId = item.product.id || item.id
-        const product = await payload.findByID({
-          collection: 'products',
-          id: productId,
+    // Add email or phone verification if provided
+    if (email || phone) {
+      whereConditions.and = []
+      if (email) {
+        whereConditions.and.push({
+          'customerInfo.email': {
+            equals: email,
+          },
         })
-
-        if (product) {
-          await payload.update({
-            collection: 'products',
-            id: productId,
-            data: {
-              analytics: {
-                ...product.analytics,
-                orderCount: (product.analytics?.orderCount || 0) + item.quantity,
-              },
-            },
-          })
-        }
-      } catch (error) {
-        console.error('Error updating product analytics:', error)
+      }
+      if (phone) {
+        whereConditions.and.push({
+          'customerInfo.phone': {
+            equals: phone,
+          },
+        })
       }
     }
 
+    const result = await payload.find({
+      collection: 'orders',
+      where: whereConditions,
+      limit: 1,
+      depth: 2,
+    })
+
+    if (result.docs.length === 0) {
+      return NextResponse.json({ success: false, error: 'Order not found' }, { status: 404 })
+    }
+
+    const order = result.docs[0]
     return NextResponse.json({
       success: true,
-      data: {
-        orderId: order.orderNumber,
-        orderNumber: order.orderNumber,
-        customerId: customerData.data.id,
-        status: order.orderStatus,
-        total: order.orderTotal,
-        createdAt: order.createdAt,
-      },
+      data: order,
     })
   } catch (error) {
-    console.error('Error creating order:', error)
-    return NextResponse.json({ success: false, error: 'Failed to create order' }, { status: 500 })
+    console.error('Get order error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to fetch order' }, { status: 500 })
   }
 }

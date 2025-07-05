@@ -1,35 +1,48 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import configPromise from '@/payload.config'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 
-export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   try {
-    const payload = await getPayloadHMR({ config: configPromise })
-    const { slug } = params
+    const { slug } = await params
 
-    const products = await payload.find({
+    if (!slug) {
+      return NextResponse.json(
+        { success: false, error: 'Product slug is required' },
+        { status: 400 },
+      )
+    }
+
+    const payload = await getPayload({ config })
+
+    // Find product by slug
+    const result = await payload.find({
       collection: 'products',
       where: {
-        slug: { equals: slug },
-        status: { equals: 'active' },
+        slug: {
+          equals: slug,
+        },
+        status: {
+          equals: 'active',
+        },
       },
       limit: 1,
-      populate: ['category', 'brand', 'images.image'],
+      depth: 3, // Include deep related data
     })
 
-    if (products.docs.length === 0) {
+    if (result.docs.length === 0) {
       return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
     }
 
-    const product = products.docs[0]
+    const product = result.docs[0]
 
-    // Transform data for frontend
+    // Transform product to match frontend interface
     const transformedProduct = {
       id: product.id,
       name: product.name,
       slug: product.slug,
       price: product.price,
-      originalPrice: product.pricing?.originalPrice,
+      originalPrice: product.pricing?.originalPrice || null,
       sku: product.sku,
       stock: product.stock,
       status: product.status,
@@ -37,9 +50,9 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       colors: product.colors ? product.colors.split(',').map((c) => c.trim()) : [],
       images:
         product.images?.map((img) => ({
-          id: img.id,
+          id: typeof img.image === 'object' ? img.image.id : img.image,
           url: typeof img.image === 'object' ? img.image.url : '',
-          alt: img.altText || typeof img.image === 'object' ? img.image.alt : '',
+          alt: img.altText || product.name,
           filename: typeof img.image === 'object' ? img.image.filename : '',
         })) || [],
       category:
@@ -57,8 +70,14 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
               id: product.brand.id,
               name: product.brand.name,
               slug: product.brand.slug,
-              logo: typeof product.brand.logo === 'object' ? product.brand.logo.url : '',
               description: product.brand.description,
+              logo:
+                typeof product.brand.logo === 'object'
+                  ? {
+                      url: product.brand.logo.url,
+                      alt: product.brand.logo.alt || product.brand.name,
+                    }
+                  : undefined,
               website: product.brand.website,
             }
           : null,
@@ -78,24 +97,12 @@ export async function GET(request: NextRequest, { params }: { params: { slug: st
       updatedAt: product.updatedAt,
     }
 
-    // Update view count
-    await payload.update({
-      collection: 'products',
-      id: product.id,
-      data: {
-        analytics: {
-          ...product.analytics,
-          viewCount: (product.analytics?.viewCount || 0) + 1,
-        },
-      },
-    })
-
     return NextResponse.json({
       success: true,
       data: transformedProduct,
     })
   } catch (error) {
-    console.error('Error fetching product:', error)
+    console.error('Single product API error:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch product' }, { status: 500 })
   }
 }

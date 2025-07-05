@@ -1,20 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import configPromise from '@/payload.config'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const payload = await getPayloadHMR({ config: configPromise })
+    const payload = await getPayload({ config })
 
-    const brands = await payload.find({
+    const result = await payload.find({
       collection: 'brands',
       where: {
-        status: { equals: 'active' },
+        status: {
+          equals: 'active',
+        },
       },
       sort: 'name',
+      limit: 100,
+      depth: 1,
     })
 
-    const transformedBrands = brands.docs.map((brand) => ({
+    const transformedBrands = result.docs.map((brand) => ({
       id: brand.id,
       name: brand.name,
       slug: brand.slug,
@@ -23,9 +27,9 @@ export async function GET() {
         typeof brand.logo === 'object'
           ? {
               url: brand.logo.url,
-              alt: brand.logo.alt,
+              alt: brand.logo.alt || brand.name,
             }
-          : null,
+          : undefined,
       website: brand.website,
       countryOfOrigin: brand.countryOfOrigin,
       isFeatured: brand.isFeatured,
@@ -39,7 +43,7 @@ export async function GET() {
       data: transformedBrands,
     })
   } catch (error) {
-    console.error('Error fetching brands:', error)
+    console.error('Brands API error:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch brands' }, { status: 500 })
   }
 }

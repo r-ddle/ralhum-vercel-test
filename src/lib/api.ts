@@ -264,6 +264,21 @@ class ApiClient {
       return []
     }
   }
+
+  async verifySKU(sku: string): Promise<ApiResponse<any>> {
+    return this.request<ApiResponse<any>>('/api/products/verify-sku', {
+      method: 'POST',
+      body: JSON.stringify({ sku }),
+    })
+  }
+
+  async trackOrder(orderNumber: string, email?: string, phone?: string): Promise<ApiResponse<any>> {
+    const params = new URLSearchParams({ orderNumber })
+    if (email) params.append('email', email)
+    if (phone) params.append('phone', phone)
+
+    return this.request<ApiResponse<any>>(`/api/orders/track?${params}`)
+  }
 }
 
 // Create singleton instance

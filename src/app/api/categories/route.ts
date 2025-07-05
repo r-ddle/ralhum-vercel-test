@@ -1,21 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayloadHMR } from '@payloadcms/next/utilities'
-import configPromise from '@/payload.config'
+import { getPayload } from 'payload'
+import config from '@payload-config'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const payload = await getPayloadHMR({ config: configPromise })
+    const payload = await getPayload({ config })
 
-    const categories = await payload.find({
+    const result = await payload.find({
       collection: 'categories',
       where: {
-        status: { equals: 'active' },
+        status: {
+          equals: 'active',
+        },
       },
       sort: 'displayOrder',
-      populate: ['image'],
+      limit: 100,
+      depth: 1,
     })
 
-    const transformedCategories = categories.docs.map((category) => ({
+    const transformedCategories = result.docs.map((category) => ({
       id: category.id,
       name: category.name,
       slug: category.slug,
@@ -24,9 +27,9 @@ export async function GET() {
         typeof category.image === 'object'
           ? {
               url: category.image?.url || '',
-              alt: category.image?.alt || '',
+              alt: category.image?.alt || category.name,
             }
-          : null,
+          : undefined,
       icon: category.icon,
       displayOrder: category.displayOrder,
       productCount: category.productCount,
@@ -39,7 +42,7 @@ export async function GET() {
       data: transformedCategories,
     })
   } catch (error) {
-    console.error('Error fetching categories:', error)
+    console.error('Categories API error:', error)
     return NextResponse.json(
       { success: false, error: 'Failed to fetch categories' },
       { status: 500 },
