@@ -224,3 +224,88 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ success: false, error: 'Failed to fetch order' }, { status: 500 })
   }
 }
+
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+    const payload = await getPayload({ config })
+
+    let updateData: any = {}
+
+    // Check content type to handle different data formats
+    const contentType = request.headers.get('content-type')
+
+    if (contentType?.includes('application/json')) {
+      // Handle JSON data
+      try {
+        updateData = await request.json()
+      } catch (jsonError) {
+        console.error('JSON parse error:', jsonError)
+        return NextResponse.json({ success: false, error: 'Invalid JSON format' }, { status: 400 })
+      }
+    } else if (contentType?.includes('multipart/form-data')) {
+      // Handle form data (which PayloadCMS often uses)
+      try {
+        const formData = await request.formData()
+        updateData = {}
+
+        for (const [key, value] of formData.entries()) {
+          // Handle nested objects (like orderStatus, paymentStatus)
+          if (typeof value === 'string') {
+            try {
+              // Try to parse as JSON if it looks like JSON
+              if (value.startsWith('{') || value.startsWith('[')) {
+                updateData[key] = JSON.parse(value)
+              } else {
+                updateData[key] = value
+              }
+            } catch {
+              updateData[key] = value
+            }
+          } else {
+            updateData[key] = value
+          }
+        }
+      } catch (formError) {
+        console.error('Form data parse error:', formError)
+        return NextResponse.json({ success: false, error: 'Invalid form data' }, { status: 400 })
+      }
+    } else {
+      // Handle raw text or other formats
+      try {
+        const text = await request.text()
+        console.log('Raw request body:', text)
+
+        if (text.trim()) {
+          updateData = JSON.parse(text)
+        } else {
+          updateData = {}
+        }
+      } catch (textError) {
+        console.error('Text parse error:', textError)
+        return NextResponse.json(
+          { success: false, error: 'Unable to parse request body' },
+          { status: 400 },
+        )
+      }
+    }
+
+    console.log('Update data received:', updateData)
+    console.log('Content-Type:', contentType)
+
+    // Update the order
+    const updatedOrder = await payload.update({
+      collection: 'orders',
+      id: parseInt(id),
+      data: updateData,
+    })
+
+    return NextResponse.json({
+      success: true,
+      data: updatedOrder,
+    })
+  } catch (error) {
+    console.error('Order update error:', error)
+    return NextResponse.json({ success: false, error: 'Failed to update order' }, { status: 500 })
+  }
+}

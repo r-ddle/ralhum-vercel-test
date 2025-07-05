@@ -76,6 +76,7 @@ const ORDER_STATUS_CONFIG = {
 
 const PAYMENT_STATUS_CONFIG = {
   pending: { label: 'Pending Payment', color: 'bg-yellow-100 text-yellow-800' },
+  partially_paid: { label: 'Partially Paid', color: 'bg-orange-100 text-orange-800' },
   paid: { label: 'Paid', color: 'bg-green-100 text-green-800' },
   'partially-paid': { label: 'Partially Paid', color: 'bg-orange-100 text-orange-800' },
   refunded: { label: 'Refunded', color: 'bg-gray-100 text-gray-800' },
@@ -112,9 +113,6 @@ export default function OrderTrackingPage() {
           id: data.order.id,
           orderNumber: data.order.orderNumber,
           customerName: data.order.customerName,
-          customerEmail: '', // You might want to mask this for security
-          customerPhone: '', // You might want to mask this for security
-          deliveryAddress: '', // You might want to mask this for security
           orderItems: data.order.orderItems.map((item: any) => ({
             productId: '',
             productName: item.productName,
@@ -161,7 +159,15 @@ export default function OrderTrackingPage() {
   }
 
   const getOrderProgress = (status: string) => {
-    const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered']
+    const statuses = [
+      'pending',
+      'confirmed',
+      'processing',
+      'shipped',
+      'delivered',
+      'cancelled',
+      'refunded',
+    ]
     const currentIndex = statuses.indexOf(status)
     return currentIndex >= 0 ? ((currentIndex + 1) / statuses.length) * 100 : 0
   }
@@ -380,46 +386,6 @@ export default function OrderTrackingPage() {
                   </CardContent>
                 </Card>
               )}
-
-              {/* Customer Information */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5" />
-                    Delivery Information
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-medium mb-2">Customer Details</h4>
-                      <div className="space-y-1 text-sm">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">Name:</span> {order.customerName}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-gray-600" />
-                          <span>{order.customerPhone}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-gray-600" />
-                          <span>{order.customerEmail}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <div>
-                      <h4 className="font-medium mb-2">Delivery Address</h4>
-                      <p className="text-sm text-gray-600">{order.deliveryAddress}</p>
-                      {order.specialInstructions && (
-                        <div className="mt-2">
-                          <span className="font-medium text-sm">Special Instructions:</span>
-                          <p className="text-sm text-gray-600">{order.specialInstructions}</p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Order Items */}
               <Card>
