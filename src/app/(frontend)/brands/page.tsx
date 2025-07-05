@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Trophy, Award, Star, Target, Globe, ArrowRight, Eye, Phone } from 'lucide-react'
+import Image from 'next/image'
 
 const brandDetails = [
   {
@@ -116,8 +117,6 @@ const brandDetails = [
 ]
 
 export default function BrandsPage() {
-  const [selectedBrand, setSelectedBrand] = useState<string | null>(null)
-
   const featuredBrands = brandDetails.filter((brand) => brand.featured)
   const otherBrands = brandDetails.filter((brand) => !brand.featured)
 
@@ -140,9 +139,9 @@ export default function BrandsPage() {
               <span className="block text-[#FF3D00]">SPORTS BRANDS</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8">
-              As Sri Lanka's exclusive distributor, we bring you authentic equipment from the
-              world's most trusted and respected sports brands. Each partnership represents decades
-              of excellence and innovation.
+              As Sri Lanka&apos;s exclusive distributor, we bring you authentic equipment from the
+              world&apos;s most trusted and respected sports brands. Each partnership represents
+              decades of excellence and innovation.
             </p>
 
             <div className="flex flex-wrap justify-center gap-4 mt-8">
@@ -189,7 +188,9 @@ export default function BrandsPage() {
                   {/* Brand Image */}
                   <div className={`relative ${!isEven ? 'lg:col-start-2' : ''}`}>
                     <div className="relative overflow-hidden rounded-2xl">
-                      <img
+                      <Image
+                        width={600}
+                        height={400}
                         src={brand.image || 'https://placehold.co/600x400'}
                         alt={brand.name}
                         className="w-full h-80 object-cover"

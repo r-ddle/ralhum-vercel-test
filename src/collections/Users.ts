@@ -28,22 +28,22 @@ const isAdminOrContentEditor = ({ req }: { req: any }) => {
 const adminOrSelfAccess = ({ req }: { req: any }) => {
   const user = req.user
 
-  // Super admins can access all users
-  if (user && user.role === 'super-admin') {
+  // No access for unauthenticated users
+  if (!user) {
+    return false
+  }
+
+  // Super admins and admins can access all users
+  if (user.role === 'super-admin' || user.role === 'admin') {
     return true
   }
 
-  // Users can only access their own profile
-  if (user) {
-    return {
-      id: {
-        equals: user.id,
-      },
-    }
+  // Regular users can only access their own profile
+  return {
+    id: {
+      equals: user.id,
+    },
   }
-
-  // No access for unauthenticated users
-  return false
 }
 
 export const Users: CollectionConfig = {

@@ -1,8 +1,8 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { ArrowRight, Star } from "lucide-react"
-import { motion } from "framer-motion"
+import { Button } from '@/components/ui/button'
+import { ArrowRight, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export default function Hero() {
   return (
@@ -61,12 +61,12 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center px-4"
         >
-          <a href="/brands" className="w-full sm:w-auto">
+          <a href="/products" className="w-full sm:w-auto">
             <Button
               size="lg"
               className="w-full sm:w-auto bg-[#FF3D00] hover:bg-[#FF3D00]/90 text-white px-6 sm:px-8 py-4 text-base sm:text-lg font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl"
             >
-              EXPLORE BRANDS
+              START SHOPPING
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </a>
@@ -88,7 +88,7 @@ export default function Hero() {
           transition={{ duration: 1, delay: 0.8 }}
           className="mt-12 sm:mt-16 flex justify-center items-center gap-3 sm:gap-8 flex-wrap px-4"
         >
-          {["Gray-Nicolls", "Gilbert", "Grays", "Molten"].map((brand, index) => (
+          {['Gray-Nicolls', 'Gilbert', 'Grays', 'Molten'].map((brand, index) => (
             <motion.div
               key={brand}
               initial={{ opacity: 0, y: 20 }}

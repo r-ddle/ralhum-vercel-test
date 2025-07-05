@@ -1,59 +1,60 @@
-"use client"
+'use client'
 
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Calendar, Users, Award, TrendingUp, Target, Globe, Star, Trophy } from "lucide-react"
+import { Badge } from '@/components/ui/badge'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Calendar, Users, Award, TrendingUp, Target, Globe, Star, Trophy } from 'lucide-react'
 
 const timeline = [
   {
-    year: "1921",
-    title: "S.M.M.Muhlar & Co Founded",
-    description: "Parent company established by S.M.M.Muhlar, pioneering garment accessories and consumer products",
+    year: '1921',
+    title: 'S.M.M.Muhlar & Co Founded',
+    description:
+      'Parent company established by S.M.M.Muhlar, pioneering garment accessories and consumer products',
     icon: Calendar,
-    color: "bg-[#003DA5]",
+    color: 'bg-[#003DA5]',
   },
   {
-    year: "1996",
-    title: "Ralhum Sports Established",
-    description: "Founded primarily to serve the cricket industry in Sri Lanka",
+    year: '1996',
+    title: 'Ralhum Sports Established',
+    description: 'Founded primarily to serve the cricket industry in Sri Lanka',
     icon: Trophy,
-    color: "bg-[#FF3D00]",
+    color: 'bg-[#FF3D00]',
   },
   {
-    year: "2000s",
-    title: "Portfolio Expansion",
-    description: "Gradually expanded to include global brands across multiple sports categories",
+    year: '2000s',
+    title: 'Portfolio Expansion',
+    description: 'Gradually expanded to include global brands across multiple sports categories',
     icon: TrendingUp,
-    color: "bg-[#AEEA00]",
+    color: 'bg-[#AEEA00]',
   },
   {
-    year: "Present",
-    title: "Market Leadership",
-    description: "Leading sports distributing company in Sri Lanka for over 25 years",
+    year: 'Present',
+    title: 'Market Leadership',
+    description: 'Leading sports distributing company in Sri Lanka for over 25 years',
     icon: Award,
-    color: "bg-[#FFD700]",
+    color: 'bg-[#FFD700]',
   },
 ]
 
 const brands = [
-  "Gray-Nicolls",
-  "Gilbert",
-  "Molten",
-  "Grays",
-  "Dunlop",
-  "Slazenger",
-  "Babolat",
-  "Carlton",
-  "Stiga",
-  "Mayor",
+  'Gray-Nicolls',
+  'Gilbert',
+  'Molten',
+  'Grays',
+  'Dunlop',
+  'Slazenger',
+  'Babolat',
+  'Carlton',
+  'Stiga',
+  'Mayor',
 ]
 
 const achievements = [
-  { number: "75+", label: "Years Parent Company Heritage", icon: Calendar },
-  { number: "25+", label: "Years Ralhum Excellence", icon: Trophy },
-  { number: "10+", label: "Global Brand Partnerships", icon: Globe },
-  { number: "#1", label: "Sports Distributor in Sri Lanka", icon: Star },
+  { number: '75+', label: 'Years Parent Company Heritage', icon: Calendar },
+  { number: '25+', label: 'Years Ralhum Excellence', icon: Trophy },
+  { number: '10+', label: 'Global Brand Partnerships', icon: Globe },
+  { number: '#1', label: 'Sports Distributor in Sri Lanka', icon: Star },
 ]
 
 export default function AboutPage() {
@@ -68,14 +69,16 @@ export default function AboutPage() {
 
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="text-center">
-            <Badge className="bg-[#FFD700] text-[#1A1A1A] px-6 py-2 text-sm font-bold mb-4">OUR STORY</Badge>
+            <Badge className="bg-[#FFD700] text-[#1A1A1A] px-6 py-2 text-sm font-bold mb-4">
+              OUR STORY
+            </Badge>
             <h1 className="text-4xl md:text-6xl font-black mb-6">
               75+ YEARS OF
               <span className="block text-[#FF3D00]">EXCELLENCE</span>
             </h1>
             <p className="text-xl text-gray-300 max-w-4xl mx-auto">
-              From humble beginnings to Sri Lanka's leading sports equipment distributor, our journey spans generations
-              of commitment to athletic excellence and unwavering quality.
+              From humble beginnings to Sri Lanka&apos;s leading sports equipment distributor, our
+              journey spans generations of commitment to athletic excellence and unwavering quality.
             </p>
           </div>
         </div>
@@ -92,7 +95,9 @@ export default function AboutPage() {
                   <div className="w-16 h-16 bg-gradient-to-br from-[#003DA5] to-[#FF3D00] rounded-full flex items-center justify-center mx-auto mb-4">
                     <IconComponent className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-4xl md:text-5xl font-black text-[#003DA5] mb-2">{achievement.number}</div>
+                  <div className="text-4xl md:text-5xl font-black text-[#003DA5] mb-2">
+                    {achievement.number}
+                  </div>
                   <p className="text-gray-600 font-medium">{achievement.label}</p>
                 </div>
               )
@@ -106,28 +111,34 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <Badge className="bg-[#003DA5] text-white px-4 py-2 text-sm font-bold mb-4">WHO WE ARE</Badge>
+              <Badge className="bg-[#003DA5] text-white px-4 py-2 text-sm font-bold mb-4">
+                WHO WE ARE
+              </Badge>
               <h2 className="text-4xl md:text-5xl font-black text-[#1A1A1A] mb-6">
                 RALHUM TRADING
                 <span className="block text-[#FF3D00]">COMPANY</span>
               </h2>
               <div className="space-y-6 text-gray-600 leading-relaxed">
                 <p className="text-lg">
-                  <strong className="text-[#003DA5]">Ralhum Trading Company Pvt Ltd</strong> was established in 1996
-                  primarily to take care of the sports and consumer industry. Originally, the parent company of Ralhum
-                  was <strong className="text-[#FF3D00]">S.M.M.Muhlar & Co</strong>, which was formed more than 75 years
-                  ago by S.M.M.Muhlar.
+                  <strong className="text-[#003DA5]">Ralhum Trading Company Pvt Ltd</strong> was
+                  established in 1996 primarily to take care of the sports and consumer industry.
+                  Originally, the parent company of Ralhum was{' '}
+                  <strong className="text-[#FF3D00]">S.M.M.Muhlar & Co</strong>, which was formed
+                  more than 75 years ago by S.M.M.Muhlar.
                 </p>
                 <p>
-                  The parent company was a pioneer in garment accessories and consumer products. Ralhum was established
-                  initially catering to the cricket industry but gradually expanded its portfolio to now include global
-                  brands such as{" "}
-                  <strong>Dunlop, Slazenger, Molten, Grays, Stiga, Carlton, Babolat, Gray-Nicolls and Mayor</strong>
+                  The parent company was a pioneer in garment accessories and consumer products.
+                  Ralhum was established initially catering to the cricket industry but gradually
+                  expanded its portfolio to now include global brands such as{' '}
+                  <strong>
+                    Dunlop, Slazenger, Molten, Grays, Stiga, Carlton, Babolat, Gray-Nicolls and
+                    Mayor
+                  </strong>
                   covering each sport strategically.
                 </p>
                 <p className="text-lg font-semibold text-[#003DA5]">
-                  It can now be proudly stated that Ralhum is the leading sports distributing company in Sri Lanka for
-                  over 25 years.
+                  It can now be proudly stated that Ralhum is the leading sports distributing
+                  company in Sri Lanka for over 25 years.
                 </p>
               </div>
             </div>
@@ -137,7 +148,10 @@ export default function AboutPage() {
                 <h3 className="text-2xl font-black mb-6">OUR GLOBAL BRANDS</h3>
                 <div className="grid grid-cols-2 gap-4">
                   {brands.map((brand, index) => (
-                    <div key={brand} className="bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm">
+                    <div
+                      key={brand}
+                      className="bg-white/10 rounded-lg p-3 text-center backdrop-blur-sm"
+                    >
                       <span className="font-bold text-sm">{brand}</span>
                     </div>
                   ))}
@@ -152,7 +166,9 @@ export default function AboutPage() {
       <section className="py-20 bg-[#1A1A1A] text-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="bg-[#FFD700] text-[#1A1A1A] px-6 py-2 text-sm font-bold mb-4">OUR JOURNEY</Badge>
+            <Badge className="bg-[#FFD700] text-[#1A1A1A] px-6 py-2 text-sm font-bold mb-4">
+              OUR JOURNEY
+            </Badge>
             <h2 className="text-4xl md:text-5xl font-black mb-6">
               HERITAGE
               <span className="block text-[#AEEA00]">TIMELINE</span>
@@ -207,7 +223,9 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <p className="font-bold">Nationwide Network</p>
-                      <p className="text-sm opacity-80">Well-spread dealer network across Sri Lanka</p>
+                      <p className="text-sm opacity-80">
+                        Well-spread dealer network across Sri Lanka
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -216,7 +234,9 @@ export default function AboutPage() {
                     </div>
                     <div>
                       <p className="font-bold">Export Operations</p>
-                      <p className="text-sm opacity-80">Exporting sports brands to other countries</p>
+                      <p className="text-sm opacity-80">
+                        Exporting sports brands to other countries
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -224,26 +244,28 @@ export default function AboutPage() {
             </div>
 
             <div className="order-1 lg:order-2">
-              <Badge className="bg-[#FF3D00] text-white px-4 py-2 text-sm font-bold mb-4">RALHUM PRESENTLY</Badge>
+              <Badge className="bg-[#FF3D00] text-white px-4 py-2 text-sm font-bold mb-4">
+                RALHUM PRESENTLY
+              </Badge>
               <h2 className="text-4xl md:text-5xl font-black text-[#1A1A1A] mb-6">
                 LEADING THE
                 <span className="block text-[#003DA5]">INDUSTRY</span>
               </h2>
               <div className="space-y-6 text-gray-600 leading-relaxed">
                 <p className="text-lg">
-                  Ralhum currently headed by <strong className="text-[#003DA5]">M.M.Mohamed</strong>, the son of the
-                  founder company chairman S.M.M.Muhlar, is the leading sports equipment distributor in Sri Lanka having
-                  in its portfolio all the leading brands.
+                  Ralhum currently headed by <strong className="text-[#003DA5]">M.M.Mohamed</strong>
+                  , the son of the founder company chairman S.M.M.Muhlar, is the leading sports
+                  equipment distributor in Sri Lanka having in its portfolio all the leading brands.
                 </p>
                 <p>
-                  With a well-spread dealer network right across the country, we ensure that quality sports equipment
-                  reaches every corner of Sri Lanka. We also export some of our sports brands to other countries,
-                  expanding our reach beyond national borders.
+                  With a well-spread dealer network right across the country, we ensure that quality
+                  sports equipment reaches every corner of Sri Lanka. We also export some of our
+                  sports brands to other countries, expanding our reach beyond national borders.
                 </p>
                 <div className="bg-[#003DA5]/10 rounded-lg p-4 border-l-4 border-[#003DA5]">
                   <p className="font-semibold text-[#003DA5]">
-                    "Our commitment to excellence and quality has made us the trusted choice for athletes, schools, and
-                    sports enthusiasts across Sri Lanka."
+                    "Our commitment to excellence and quality has made us the trusted choice for
+                    athletes, schools, and sports enthusiasts across Sri Lanka."
                   </p>
                 </div>
               </div>
@@ -256,7 +278,9 @@ export default function AboutPage() {
       <section className="py-20 bg-gradient-to-br from-[#003DA5] to-[#FF3D00] text-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <Badge className="bg-white text-[#003DA5] px-6 py-2 text-sm font-bold mb-4">RALHUM IN THE FUTURE</Badge>
+            <Badge className="bg-white text-[#003DA5] px-6 py-2 text-sm font-bold mb-4">
+              RALHUM IN THE FUTURE
+            </Badge>
             <h2 className="text-4xl md:text-5xl font-black mb-6">
               OUR
               <span className="block text-[#FFD700]">VISION</span>
@@ -269,8 +293,9 @@ export default function AboutPage() {
                 <Target className="w-12 h-12 text-[#FFD700] mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-4">HOUSEHOLD NAME</h3>
                 <p className="text-gray-200 leading-relaxed">
-                  To make Ralhum a household name for sports having a very solid reputation in whatever sports it serves
-                  and to give consumers the best quality at an affordable price.
+                  To make Ralhum a household name for sports having a very solid reputation in
+                  whatever sports it serves and to give consumers the best quality at an affordable
+                  price.
                 </p>
               </CardContent>
             </Card>
@@ -280,8 +305,8 @@ export default function AboutPage() {
                 <Trophy className="w-12 h-12 text-[#AEEA00] mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-4">RALHUM ELITE SQUAD</h3>
                 <p className="text-gray-200 leading-relaxed">
-                  To have under our sponsorship a leading squad of players using the particular brands which Ralhum
-                  distributes. This elite squad will carry our name forward.
+                  To have under our sponsorship a leading squad of players using the particular
+                  brands which Ralhum distributes. This elite squad will carry our name forward.
                 </p>
               </CardContent>
             </Card>
@@ -291,8 +316,8 @@ export default function AboutPage() {
                 <Globe className="w-12 h-12 text-[#FF3D00] mx-auto mb-4" />
                 <h3 className="text-xl font-bold mb-4">REGIONAL EXPANSION</h3>
                 <p className="text-gray-200 leading-relaxed">
-                  To expand the horizons of Ralhum to serve regions like South Asia and the Middle East with products
-                  and brands which are in demand.
+                  To expand the horizons of Ralhum to serve regions like South Asia and the Middle
+                  East with products and brands which are in demand.
                 </p>
               </CardContent>
             </Card>
@@ -300,8 +325,8 @@ export default function AboutPage() {
 
           <div className="text-center mt-12">
             <p className="text-xl mb-8 opacity-90">
-              Carrying out operations in an ethically professional manner while building the future of sports in Sri
-              Lanka
+              Carrying out operations in an ethically professional manner while building the future
+              of sports in Sri Lanka
             </p>
             <Button
               size="lg"

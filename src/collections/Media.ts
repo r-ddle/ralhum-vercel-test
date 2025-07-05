@@ -12,11 +12,22 @@ export const Media: CollectionConfig = {
   access: {
     // Content editors and above can upload media
     create: isAdminOrContentEditor,
-    // All authenticated users can read media
-    read: ({ req }) => Boolean(req.user),
-    // Only admins and product managers can update media
+    // All authenticated users can read media, but limit sensitive fields
+    read: ({ req }) => {
+      if (!req.user) {
+        // Public can only read public media
+        return {
+          isPublic: {
+            equals: true,
+          },
+        }
+      }
+      // Authenticated users can read all media
+      return true
+    },
+    // Only admins and product managers can update media metadata
     update: isAdminOrProductManager,
-    // Only super admins can delete media
+    // Only super admins can delete media (to prevent accidental deletions)
     delete: isSuperAdmin,
   },
   upload: {

@@ -53,16 +53,6 @@ export default function Navigation() {
             {/* Cart */}
             <CartButton />
 
-            {/* Account */}
-            <Button
-              variant="ghost"
-              size="sm"
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
-              aria-label="Account"
-            >
-              <User className="w-5 h-5" />
-            </Button>
-
             <ThemeToggle />
 
             <Button

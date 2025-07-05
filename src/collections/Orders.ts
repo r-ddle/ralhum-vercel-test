@@ -18,10 +18,25 @@ export const Orders: CollectionConfig = {
     listSearchableFields: ['orderNumber', 'customerName', 'customerEmail', 'customerPhone'],
   },
   access: {
-    // Admins and above can create orders
+    // Admins and above can create orders (for manual order entry)
     create: isAdmin,
-    // Admins and product managers can read orders
-    read: isAdminOrProductManager,
+    // Admins and product managers can read orders, plus customers can read their own
+    read: ({ req }) => {
+      const user = req.user
+
+      if (!user) {
+        return false
+      }
+
+      // Admins and managers can read all orders
+      if (['super-admin', 'admin', 'product-manager'].includes(user.role ? user.role : '')) {
+        return true
+      }
+
+      // Other authenticated users can't read orders
+      // (Customer order access should be handled via API with email/phone verification)
+      return false
+    },
     // Admins and above can update orders
     update: isAdmin,
     // Only admins can delete orders

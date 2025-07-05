@@ -15,10 +15,10 @@ export interface CustomerInfo {
   phone?: string
   secondaryPhone?: string
   address?: {
-    street: string
-    city: string
-    postalCode: string
-    province: string
+    street?: string
+    city?: string
+    postalCode?: string
+    province?: string
   }
   specialInstructions?: string
 }
@@ -28,7 +28,6 @@ export interface OrderPricing {
   shipping: number
   tax: number
   total: number
-  exchangeRate: number
   currency: string
 }
 

@@ -1,10 +1,10 @@
-"use client"
+'use client'
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Phone, MapPin, Mail, Clock, Facebook, Instagram } from "lucide-react"
-import WhatsAppButton from "@/components/whatsapp-button"
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Phone, MapPin, Mail, Clock, Facebook, Instagram } from 'lucide-react'
+import WhatsAppButton from '@/components/whatsapp-button'
 
 export default function ContactCTA() {
   return (
@@ -12,14 +12,16 @@ export default function ContactCTA() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <Badge className="bg-[#FFD700] text-[#1A1A1A] px-6 py-2 text-sm font-bold mb-4">GET IN TOUCH</Badge>
+          <Badge className="bg-[#FFD700] text-[#1A1A1A] px-6 py-2 text-sm font-bold mb-4">
+            GET IN TOUCH
+          </Badge>
           <h2 className="text-4xl md:text-6xl font-black mb-6">
             READY TO ELEVATE
             <span className="block text-[#FF3D00]">YOUR GAME?</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-            Contact Sri Lanka's #1 sports equipment distributor today. Our expert team is ready to help you find the
-            perfect equipment for your needs.
+            Contact Sri Lanka's #1 sports equipment distributor today. Our expert team is ready to
+            help you find the perfect equipment for your needs.
           </p>
         </div>
 
@@ -104,21 +106,6 @@ export default function ContactCTA() {
             >
               <Instagram className="w-5 h-5" />
             </Button>
-          </div>
-        </div>
-
-        {/* E-commerce Teaser */}
-        <div className="mt-16 text-center">
-          <div className="bg-gradient-to-r from-[#FFD700]/20 to-[#AEEA00]/20 border border-[#FFD700]/30 rounded-2xl p-8 backdrop-blur-sm">
-            <h3 className="text-2xl font-black mb-4">
-              🚀 <span className="text-[#FFD700]">COMING SOON</span> 🚀
-            </h3>
-            <p className="text-lg text-gray-300 mb-4">
-              Our new e-commerce platform is launching soon! Shop online for all your favorite sports equipment.
-            </p>
-            <Badge className="bg-[#AEEA00] text-[#1A1A1A] px-6 py-2 font-bold">
-              Be the first to know - Contact us for updates!
-            </Badge>
           </div>
         </div>
       </div>

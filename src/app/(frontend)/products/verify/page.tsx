@@ -108,13 +108,13 @@ export default function ProductVerificationPage() {
   }
 
   const getVerificationStatus = () => {
-    if (!searched) return null
+    if (!searched || loading) return null
 
     if (product && !error) {
       return {
         type: 'authentic',
         icon: CheckCircle,
-        title: '✅ AUTHENTIC PRODUCT',
+        title: 'AUTHENTIC PRODUCT',
         description: 'This product is verified as authentic and available in our inventory.',
         color: 'text-green-600',
         bgColor: 'bg-green-50',
@@ -124,17 +124,17 @@ export default function ProductVerificationPage() {
       return {
         type: 'warning',
         icon: AlertTriangle,
-        title: '⚠️ VERIFICATION WARNING',
+        title: 'VERIFICATION WARNING',
         description: error,
         color: 'text-orange-600',
         bgColor: 'bg-orange-50',
         borderColor: 'border-orange-200',
       }
-    } else {
+    } else if (!product && error) {
       return {
         type: 'not-found',
         icon: X,
-        title: '❌ NOT VERIFIED',
+        title: 'NOT VERIFIED',
         description:
           'This SKU was not found in our authentic product inventory. This may be a counterfeit product.',
         color: 'text-red-600',
@@ -142,6 +142,8 @@ export default function ProductVerificationPage() {
         borderColor: 'border-red-200',
       }
     }
+
+    return null
   }
 
   const verificationStatus = getVerificationStatus()

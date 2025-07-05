@@ -20,9 +20,9 @@ export const Customers: CollectionConfig = {
   access: {
     // Admins and product managers can create customers
     create: isAdminOrProductManager,
-    // Admins and product managers can read customers
+    // Only admins and product managers can read customer data
     read: isAdminOrProductManager,
-    // Admins and product managers can update customers
+    // Only admins and product managers can update customers
     update: isAdminOrProductManager,
     // Only admins can delete customers
     delete: isAdmin,
@@ -430,62 +430,6 @@ export const Customers: CollectionConfig = {
           req.payload.logger.info(
             `Customer updated: ${doc.name} (${doc.email}) by ${req.user?.email}`,
           )
-        }
-
-        // Update order statistics when customer is created/updated
-        if (operation === 'create' || operation === 'update') {
-          try {
-            // Get all orders for this customer
-            const orders = await req.payload.find({
-              collection: 'orders',
-              where: {
-                customerEmail: {
-                  equals: doc.email,
-                },
-              },
-            })
-
-            if (orders.docs.length > 0) {
-              const stats = {
-                totalOrders: orders.docs.length,
-                pendingOrders: orders.docs.filter((order: any) =>
-                  ['pending', 'confirmed', 'processing'].includes(order.orderStatus),
-                ).length,
-                completedOrders: orders.docs.filter(
-                  (order: any) => order.orderStatus === 'delivered',
-                ).length,
-                cancelledOrders: orders.docs.filter((order: any) =>
-                  ['cancelled', 'refunded'].includes(order.orderStatus),
-                ).length,
-                totalSpent: orders.docs.reduce(
-                  (sum: number, order: any) => sum + order.orderTotal,
-                  0,
-                ),
-                averageOrderValue:
-                  orders.docs.reduce((sum: number, order: any) => sum + order.orderTotal, 0) /
-                  orders.docs.length,
-                lastOrderDate: orders.docs.sort(
-                  (a: any, b: any) =>
-                    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-                )[0].createdAt,
-                firstOrderDate: orders.docs.sort(
-                  (a: any, b: any) =>
-                    new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-                )[0].createdAt,
-              }
-
-              // Update customer with new stats
-              await req.payload.update({
-                collection: 'customers',
-                id: doc.id,
-                data: {
-                  orderStats: stats,
-                } as any,
-              })
-            }
-          } catch (error) {
-            req.payload.logger.error(`Failed to update customer order statistics: ${error}`)
-          }
         }
       },
     ],

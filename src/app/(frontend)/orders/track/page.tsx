@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useState } from 'react'
-import { getOrder } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -76,9 +75,8 @@ const ORDER_STATUS_CONFIG = {
 
 const PAYMENT_STATUS_CONFIG = {
   pending: { label: 'Pending Payment', color: 'bg-yellow-100 text-yellow-800' },
-  partially_paid: { label: 'Partially Paid', color: 'bg-orange-100 text-orange-800' },
-  paid: { label: 'Paid', color: 'bg-green-100 text-green-800' },
   'partially-paid': { label: 'Partially Paid', color: 'bg-orange-100 text-orange-800' },
+  paid: { label: 'Paid', color: 'bg-green-100 text-green-800' },
   refunded: { label: 'Refunded', color: 'bg-gray-100 text-gray-800' },
   failed: { label: 'Payment Failed', color: 'bg-red-100 text-red-800' },
 }
@@ -101,75 +99,76 @@ export default function OrderTrackingPage() {
     setError(null)
 
     try {
-      // Call your new API endpoint
+      console.log('🔍 Tracking order:', orderId.trim())
+
+      // Call the tracking API
       const response = await fetch(
         `/api/orders/track?orderNumber=${encodeURIComponent(orderId.trim())}`,
       )
       const data = await response.json()
 
-      if (data.success && data.found && data.order) {
+      console.log('📦 API Response:', data)
+
+      // ✅ Fixed: Check the correct response structure
+      if (data.success && data.data && data.data.found && data.data.order) {
+        const orderData = data.data.order
+
+        console.log('✅ Order found:', orderData)
+
         // Convert the PayloadCMS order to match your Order type
         const convertedOrder: Order = {
-          id: data.order.id,
-          orderNumber: data.order.orderNumber,
-          customerName: data.order.customerName,
-          orderItems: data.order.orderItems.map((item: any) => ({
-            productId: '',
+          id: orderData.id,
+          orderNumber: orderData.orderNumber,
+          customerName: orderData.customerName,
+          customerEmail: '', // Not returned by API for security
+          customerPhone: '', // Not returned by API for security
+          deliveryAddress: '', // Not returned by API for security
+          orderItems: orderData.orderItems.map((item: any) => ({
+            productId: item.productId || '',
             productName: item.productName,
-            productSku: '',
+            productSku: item.productSku || '',
             unitPrice: item.unitPrice,
             quantity: item.quantity,
             selectedSize: item.selectedSize,
             selectedColor: item.selectedColor,
             subtotal: item.subtotal,
           })),
-          orderSubtotal: data.order.orderTotal, // You might need to calculate this
-          shippingCost: 0, // You might need to get this from the order
-          discount: 0, // You might need to get this from the order
-          orderTotal: data.order.orderTotal,
-          orderStatus: data.order.orderStatus as any,
-          paymentStatus: data.order.paymentStatus as any,
+          orderSubtotal: orderData.orderTotal, // API doesn't return separate subtotal
+          shippingCost: 0, // API doesn't return separate shipping
+          discount: 0, // API doesn't return separate discount
+          orderTotal: orderData.orderTotal,
+          orderStatus: orderData.orderStatus as any,
+          paymentStatus: orderData.paymentStatus as any,
           paymentMethod: undefined,
           specialInstructions: '',
           shipping: {
-            trackingNumber: data.order.shipping?.trackingNumber,
-            courier: data.order.shipping?.courier,
-            estimatedDelivery: data.order.shipping?.estimatedDelivery,
-            actualDelivery: data.order.shipping?.actualDelivery,
+            trackingNumber: orderData.shipping?.trackingNumber || undefined,
+            courier: orderData.shipping?.courier || undefined,
+            estimatedDelivery: orderData.shipping?.estimatedDelivery || undefined,
+            actualDelivery: orderData.shipping?.actualDelivery || undefined,
           },
-          createdAt: data.order.createdAt,
-          updatedAt: data.order.updatedAt,
+          createdAt: orderData.createdAt,
+          updatedAt: orderData.updatedAt,
         }
 
         setOrder(convertedOrder)
+        setError(null)
         toast.success('Order found!')
       } else {
-        setError(data.message || 'Order not found')
+        // ✅ Fixed: Handle the correct "not found" case
+        console.log('❌ Order not found or invalid response structure')
+        setError(data.data?.message || data.error || 'Order not found')
         setOrder(null)
         toast.error('Order not found')
       }
     } catch (error) {
-      console.error('Order tracking error:', error)
+      console.error('❌ Order tracking error:', error)
       setError('Failed to fetch order details. Please try again.')
       setOrder(null)
       toast.error('Failed to track order')
     } finally {
       setLoading(false)
     }
-  }
-
-  const getOrderProgress = (status: string) => {
-    const statuses = [
-      'pending',
-      'confirmed',
-      'processing',
-      'shipped',
-      'delivered',
-      'cancelled',
-      'refunded',
-    ]
-    const currentIndex = statuses.indexOf(status)
-    return currentIndex >= 0 ? ((currentIndex + 1) / statuses.length) * 100 : 0
   }
 
   const getOrderSteps = (currentStatus: string) => {
@@ -276,23 +275,28 @@ export default function OrderTrackingPage() {
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Order #{order.orderNumber}</CardTitle>
-                    <Badge className={ORDER_STATUS_CONFIG[order.orderStatus].color}>
-                      {ORDER_STATUS_CONFIG[order.orderStatus].label}
+                    <Badge
+                      className={
+                        ORDER_STATUS_CONFIG[order.orderStatus]?.color || 'bg-gray-100 text-gray-800'
+                      }
+                    >
+                      {ORDER_STATUS_CONFIG[order.orderStatus]?.label || order.orderStatus}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   {/* Status Description */}
                   <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
-                    {React.createElement(ORDER_STATUS_CONFIG[order.orderStatus].icon, {
+                    {React.createElement(ORDER_STATUS_CONFIG[order.orderStatus]?.icon || Clock, {
                       className: 'w-5 h-5 text-[#003DA5] mt-0.5',
                     })}
                     <div>
                       <p className="font-medium text-[#003DA5]">
-                        {ORDER_STATUS_CONFIG[order.orderStatus].label}
+                        {ORDER_STATUS_CONFIG[order.orderStatus]?.label || order.orderStatus}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {ORDER_STATUS_CONFIG[order.orderStatus].description}
+                        {ORDER_STATUS_CONFIG[order.orderStatus]?.description ||
+                          'Order status updated.'}
                       </p>
                     </div>
                   </div>
@@ -301,7 +305,7 @@ export default function OrderTrackingPage() {
                   <div className="space-y-4">
                     <h3 className="font-bold">Order Progress</h3>
                     <div className="space-y-4">
-                      {getOrderSteps(order.orderStatus).map((step, index) => (
+                      {getOrderSteps(order.orderStatus).map((step) => (
                         <div key={step.status} className="flex items-center gap-4">
                           <div
                             className={`w-10 h-10 rounded-full flex items-center justify-center ${
@@ -401,7 +405,9 @@ export default function OrderTrackingPage() {
                       <div key={index} className="flex items-center gap-4 p-4 border rounded-lg">
                         <div className="flex-1">
                           <h4 className="font-medium">{item.productName}</h4>
-                          <p className="text-sm text-gray-600">SKU: {item.productSku}</p>
+                          {item.productSku && (
+                            <p className="text-sm text-gray-600">SKU: {item.productSku}</p>
+                          )}
                           {item.selectedSize && (
                             <p className="text-sm text-gray-600">Size: {item.selectedSize}</p>
                           )}
@@ -411,8 +417,8 @@ export default function OrderTrackingPage() {
                         </div>
                         <div className="text-right">
                           <p className="font-medium">Qty: {item.quantity}</p>
-                          <p className="text-sm text-gray-600">{item.unitPrice} each</p>
-                          <p className="font-bold">{item.subtotal}</p>
+                          <p className="text-sm text-gray-600">{item.unitPrice} LKR each</p>
+                          <p className="font-bold">{item.subtotal} LKR</p>
                         </div>
                       </div>
                     ))}
@@ -422,24 +428,9 @@ export default function OrderTrackingPage() {
 
                   {/* Order Total */}
                   <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Subtotal:</span>
-                      <span>{order.orderSubtotal}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Shipping:</span>
-                      <span>{order.shippingCost}</span>
-                    </div>
-                    {order.discount > 0 && (
-                      <div className="flex justify-between text-green-600">
-                        <span>Discount:</span>
-                        <span>-{order.discount}</span>
-                      </div>
-                    )}
-                    <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total:</span>
-                      <span className="text-[#003DA5]">{order.orderTotal}</span>
+                      <span className="text-[#003DA5]">{order.orderTotal} LKR</span>
                     </div>
                   </div>
 
@@ -447,8 +438,13 @@ export default function OrderTrackingPage() {
                   <div className="mt-4 pt-4 border-t">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">Payment Status:</span>
-                      <Badge className={PAYMENT_STATUS_CONFIG[order.paymentStatus].color}>
-                        {PAYMENT_STATUS_CONFIG[order.paymentStatus].label}
+                      <Badge
+                        className={
+                          PAYMENT_STATUS_CONFIG[order.paymentStatus]?.color ||
+                          'bg-gray-100 text-gray-800'
+                        }
+                      >
+                        {PAYMENT_STATUS_CONFIG[order.paymentStatus]?.label || order.paymentStatus}
                       </Badge>
                     </div>
                     {order.paymentMethod && (
@@ -498,10 +494,10 @@ export default function OrderTrackingPage() {
           )}
 
           {/* Help Section */}
-          {!order && (
+          {!order && !loading && (
             <Card>
               <CardHeader>
-                <CardTitle>Can't Find Your Order?</CardTitle>
+                <CardTitle>Can&apos;t Find Your Order?</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-sm text-gray-600 space-y-2">
@@ -509,7 +505,7 @@ export default function OrderTrackingPage() {
                     <strong>Double-check your Order ID:</strong>
                   </p>
                   <ul className="list-disc list-inside space-y-1 ml-4">
-                    <li>Order IDs start with "RS-" followed by numbers and letters</li>
+                    <li>Order IDs start with &quot;RS-&quot; followed by numbers and letters</li>
                     <li>Make sure there are no extra spaces</li>
                     <li>Check your WhatsApp messages or email confirmations</li>
                   </ul>

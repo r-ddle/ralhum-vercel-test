@@ -4,58 +4,124 @@
 
 @layer base {
   :root {
+    /* Light mode colors */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+
+    /* Brand primary - your blue */
+    --primary: 217 100% 32%;  /* #003DA5 */
     --primary-foreground: 210 40% 98%;
+
+    /* Secondary colors */
     --secondary: 210 40% 96%;
     --secondary-foreground: 222.2 47.4% 11.2%;
+
+    /* Muted colors with better contrast */
     --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
+
+    /* Accent colors */
     --accent: 210 40% 96%;
     --accent-foreground: 222.2 47.4% 11.2%;
+
+    /* Destructive colors */
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+
+    /* Success colors */
+    --success: 142 76% 36%;
+    --success-foreground: 210 40% 98%;
+
+    /* Warning colors */
+    --warning: 38 92% 50%;
+    --warning-foreground: 222.2 47.4% 11.2%;
+
+    /* Border and input */
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 217 100% 32%;
     --radius: 0.5rem;
+
+    /* Chart colors */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+
+    /* Sidebar colors */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 217 100% 32%;
+    --sidebar-primary-foreground: 210 40% 98%;
+    --sidebar-accent: 220 14.3% 95.9%;
+    --sidebar-accent-foreground: 220 8.9% 46.1%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217 100% 32%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
+    /* Dark mode colors with proper contrast */
+    --background: 222.2 84% 4.9%;     /* Very dark blue-gray */
+    --foreground: 210 40% 98%;        /* Almost white */
+    --card: 222.2 84% 7%;             /* Slightly lighter than background */
+    --card-foreground: 210 40% 98%;   /* Almost white */
+    --popover: 222.2 84% 4.9%;        /* Same as background */
+    --popover-foreground: 210 40% 98%; /* Almost white */
+
+    /* Brand primary - lighter blue for dark mode */
+    --primary: 217 91% 60%;           /* Lighter blue #4A90E2 */
+    --primary-foreground: 222.2 84% 4.9%;
+
+    /* Secondary colors */
+    --secondary: 217.2 32.6% 17.5%;   /* Dark blue-gray */
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
+
+    /* Muted colors with better visibility */
+    --muted: 217.2 32.6% 17.5%;       /* Dark blue-gray */
+    --muted-foreground: 215 20.2% 65.1%; /* Light gray */
+
+    /* Accent colors */
+    --accent: 217.2 32.6% 17.5%;      /* Dark blue-gray */
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
+
+    /* Destructive colors */
+    --destructive: 0 62.8% 30.6%;     /* Dark red */
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+
+    /* Success colors */
+    --success: 142 70% 45%;           /* Medium green */
+    --success-foreground: 210 40% 98%;
+
+    /* Warning colors */
+    --warning: 38 92% 50%;            /* Keep warning bright */
+    --warning-foreground: 222.2 84% 4.9%;
+
+    /* Border and input */
+    --border: 217.2 32.6% 17.5%;      /* Dark blue-gray */
+    --input: 217.2 32.6% 17.5%;       /* Dark blue-gray */
+    --ring: 217 91% 60%;              /* Light blue ring */
+
+    /* Chart colors for dark mode */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+
+    /* Sidebar colors for dark mode */
+    --sidebar-background: 222.2 84% 4.9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222.2 84% 4.9%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+    --sidebar-ring: 217 91% 60%;
   }
 }
 
@@ -63,15 +129,16 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* Custom animations */
+/* Enhanced custom animations */
 @keyframes float {
-  0%,
-  100% {
+  0%, 100% {
     transform: translateY(0px);
   }
   50% {
@@ -79,8 +146,34 @@
   }
 }
 
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 61, 165, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(0, 61, 165, 0.5);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
 }
 
 /* Smooth scrolling */
@@ -88,17 +181,31 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Custom gradient text */
+/* Custom gradient text with better dark mode support */
 .gradient-text {
-  background: linear-gradient(135deg, #ffd700, #aeea00);
+  background: linear-gradient(135deg, #003DA5, #FFD700);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* Dark mode specific styles */
 .dark .gradient-text {
-  background: linear-gradient(135deg, #ffd700, #aeea00);
+  background: linear-gradient(135deg, #4A90E2, #FFD700);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gold gradient for special elements */
+.gradient-gold {
+  background: linear-gradient(135deg, #FFD700, #AEEA00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.dark .gradient-gold {
+  background: linear-gradient(135deg, #FFD700, #AEEA00);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -125,15 +232,12 @@ html {
   }
 
   /* Prevent horizontal scroll */
-  html,
-  body {
+  html, body {
     overflow-x: hidden;
   }
 
   /* Better form inputs on mobile */
-  input,
-  textarea,
-  select {
+  input, textarea, select {
     font-size: 16px; /* Prevents zoom on iOS */
   }
 
@@ -149,44 +253,37 @@ html {
 
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *, *::before, *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
 
-/* Focus indicators for keyboard navigation */
+/* Enhanced focus indicators for keyboard navigation */
 button:focus-visible,
 a:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid #003da5;
-  outline-offset: 2px;
-}
-
-.dark button:focus-visible,
-.dark a:focus-visible,
-.dark input:focus-visible,
-.dark textarea:focus-visible,
-.dark select:focus-visible {
-  outline: 2px solid #4a90e2;
+  outline: 2px solid hsl(var(--primary));
   outline-offset: 2px;
 }
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .bg-gradient-to-br,
-  .bg-gradient-to-r {
-    background: #003da5 !important;
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --primary: 217 100% 32%;
+    --primary-foreground: 0 0% 100%;
   }
 
-  .dark .bg-gradient-to-br,
-  .dark .bg-gradient-to-r {
-    background: #1a1a1a !important;
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 0%;
   }
 }
 
@@ -203,13 +300,6 @@ select:focus-visible {
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-/* Smooth scrolling with reduced motion respect */
-@media (prefers-reduced-motion: no-preference) {
-  html {
-    scroll-behavior: smooth;
-  }
 }
 
 /* Loading states */
@@ -235,42 +325,12 @@ select:focus-visible {
   animation: whatsapp-pulse 2s infinite;
 }
 
-/* Dark mode transitions */
+/* Enhanced transitions */
 * {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
-
-/* Dark mode specific component styles */
-.dark .bg-white {
-  @apply bg-gray-900;
-}
-
-.dark .bg-gray-50 {
-  @apply bg-gray-800;
-}
-
-.dark .text-gray-900 {
-  @apply text-gray-100;
-}
-
-.dark .text-gray-800 {
-  @apply text-gray-200;
-}
-
-.dark .text-gray-700 {
-  @apply text-gray-300;
-}
-
-.dark .text-gray-600 {
-  @apply text-gray-400;
-}
-
-.dark .border-gray-200 {
-  @apply border-gray-700;
-}
-
-.dark .border-gray-300 {
-  @apply border-gray-600;
+  transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+             border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+             color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+             box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Enhanced mobile responsiveness */
@@ -308,7 +368,8 @@ select:focus-visible {
 
 /* Improved card hover effects */
 .card-hover {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-hover:hover {
@@ -317,12 +378,12 @@ select:focus-visible {
 }
 
 .dark .card-hover:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 /* Better button interactions */
 .btn-scale {
-  transition: transform 0.2s ease;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-scale:hover {
@@ -335,17 +396,13 @@ select:focus-visible {
 
 /* Enhanced form styling */
 .form-input {
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .form-input:focus {
-  border-color: #003da5;
-  box-shadow: 0 0 0 3px rgba(0, 61, 165, 0.1);
-}
-
-.dark .form-input:focus {
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.1);
 }
 
 /* Skeleton loading animations */
@@ -359,12 +416,139 @@ select:focus-visible {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 75%);
   background-size: 200px 100%;
   animation: skeleton-loading 1.5s infinite;
 }
 
-.dark .skeleton {
-  background: linear-gradient(90deg, #374151 25%, #4b5563 50%, #374151 75%);
-  background-size: 200px 100%;
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced text colors for better dark mode visibility */
+.text-primary {
+  color: hsl(var(--primary));
+}
+
+.text-secondary {
+  color: hsl(var(--secondary-foreground));
+}
+
+.text-muted {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Brand specific classes */
+.bg-brand-blue {
+  background-color: #003DA5;
+}
+
+.dark .bg-brand-blue {
+  background-color: #4A90E2;
+}
+
+.text-brand-blue {
+  color: #003DA5;
+}
+
+.dark .text-brand-blue {
+  color: #4A90E2;
+}
+
+.bg-brand-gold {
+  background-color: #FFD700;
+}
+
+.text-brand-gold {
+  color: #FFD700;
+}
+
+.bg-brand-lime {
+  background-color: #AEEA00;
+}
+
+.text-brand-lime {
+  color: #AEEA00;
+}
+
+/* Improved scrollbar for dark mode */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary));
+}
+
+/* Enhanced selection colors */
+::selection {
+  background: hsl(var(--primary) / 0.2);
+  color: hsl(var(--primary-foreground));
+}
+
+.dark ::selection {
+  background: hsl(var(--primary) / 0.3);
+  color: hsl(var(--foreground));
+}
+
+/* Better print styles */
+@media print {
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a, a:visited {
+    text-decoration: underline;
+  }
+
+  pre, blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr, img {
+    page-break-inside: avoid;
+  }
+
+  img {
+    max-width: 100% !important;
+  }
+
+  p, h2, h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2, h3 {
+    page-break-after: avoid;
+  }
 }

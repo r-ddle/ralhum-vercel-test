@@ -17,7 +17,6 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Skeleton } from '@/components/ui/skeleton'
 import {
   ShoppingCart,
   CreditCard,
@@ -34,13 +33,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import {
-  CustomerInfo,
-  OrderSummary,
-  CheckoutState,
-  FormErrors,
-  SRI_LANKAN_PROVINCES,
-} from '@/types/checkout'
+import { OrderSummary, CheckoutState, FormErrors, SRI_LANKAN_PROVINCES } from '@/types/checkout'
 import {
   openWhatsAppOrder,
   validateSriLankanPhone,
@@ -54,7 +47,6 @@ import { toast } from 'sonner'
 export default function CheckoutPage() {
   const router = useRouter()
   const { cart, clearCart } = useCart()
-  const cartSummary = useCartSummary()
 
   const [checkoutState, setCheckoutState] = useState<CheckoutState>({
     step: 'review',
@@ -70,6 +62,9 @@ export default function CheckoutPage() {
     errors: {},
   })
 
+  // ✅ Separate state for confirmation to ensure proper rendering
+  const [showConfirmation, setShowConfirmation] = useState(false)
+  const [confirmationOrderId, setConfirmationOrderId] = useState('')
   const [apiError, setApiError] = useState<string | null>(null)
 
   // Calculate pricing whenever cart changes
@@ -96,10 +91,20 @@ export default function CheckoutPage() {
 
   // Redirect if cart is empty
   React.useEffect(() => {
-    if (cart.items.length === 0) {
+    if (cart.items.length === 0 && !showConfirmation) {
       router.push('/products')
     }
-  }, [cart.items.length, router])
+  }, [cart.items.length, showConfirmation, router])
+
+  // ✅ Debug logging for state changes
+  React.useEffect(() => {
+    console.log('🔍 State updated:', {
+      step: checkoutState.step,
+      showConfirmation,
+      confirmationOrderId,
+      isSubmitting: checkoutState.isSubmitting,
+    })
+  }, [checkoutState, showConfirmation, confirmationOrderId])
 
   const validateForm = (): boolean => {
     const errors: FormErrors = {}
@@ -164,12 +169,25 @@ export default function CheckoutPage() {
   }
 
   const handleSubmitOrder = async () => {
+    console.log('🚀 Starting order submission')
+
+    // ✅ Prevent multiple submissions
+    if (checkoutState.isSubmitting) {
+      console.log('⚠️ Already submitting, returning')
+      return
+    }
+
     if (!validateForm()) {
       toast.error('Please fill in all required fields correctly')
       return
     }
 
-    setCheckoutState((prev) => ({ ...prev, isSubmitting: true }))
+    // ✅ Set submitting state FIRST
+    setCheckoutState((prev) => ({
+      ...prev,
+      isSubmitting: true,
+      errors: {}, // Clear any previous errors
+    }))
 
     try {
       // Prepare customer data for API
@@ -178,14 +196,19 @@ export default function CheckoutPage() {
         email: checkoutState.customerInfo.email!,
         phone: formatSriLankanPhone(checkoutState.customerInfo.phone!),
         secondaryPhone: checkoutState.customerInfo.secondaryPhone,
-        address: checkoutState.customerInfo.address
-          ? {
-              street: checkoutState.customerInfo.address.street,
-              city: checkoutState.customerInfo.address.city,
-              postalCode: checkoutState.customerInfo.address.postalCode,
-              province: checkoutState.customerInfo.address.province,
-            }
-          : undefined,
+        address:
+          checkoutState.customerInfo.address &&
+          checkoutState.customerInfo.address.street &&
+          checkoutState.customerInfo.address.city &&
+          checkoutState.customerInfo.address.postalCode &&
+          checkoutState.customerInfo.address.province
+            ? {
+                street: checkoutState.customerInfo.address.street,
+                city: checkoutState.customerInfo.address.city,
+                postalCode: checkoutState.customerInfo.address.postalCode,
+                province: checkoutState.customerInfo.address.province,
+              }
+            : undefined,
         preferredLanguage: 'english',
         marketingOptIn: true,
       }
@@ -198,10 +221,10 @@ export default function CheckoutPage() {
           phone: formatSriLankanPhone(checkoutState.customerInfo.phone!),
           secondaryPhone: checkoutState.customerInfo.secondaryPhone,
           address: {
-            street: checkoutState.customerInfo.address!.street,
-            city: checkoutState.customerInfo.address!.city,
-            postalCode: checkoutState.customerInfo.address!.postalCode,
-            province: checkoutState.customerInfo.address!.province,
+            street: checkoutState.customerInfo.address?.street ?? '',
+            city: checkoutState.customerInfo.address?.city ?? '',
+            postalCode: checkoutState.customerInfo.address?.postalCode ?? '',
+            province: checkoutState.customerInfo.address?.province ?? '',
           },
           specialInstructions: checkoutState.customerInfo.specialInstructions,
           preferredLanguage: 'english',
@@ -227,6 +250,8 @@ export default function CheckoutPage() {
         orderSource: 'website',
       }
 
+      console.log('📦 Creating order via API...')
+
       // Save order to database via API
       const apiResponse = await api.createOrder(orderData)
 
@@ -234,21 +259,29 @@ export default function CheckoutPage() {
         throw new Error(apiResponse.error || 'Failed to create order')
       }
 
-      const OrderNumber = apiResponse.data?.orderNumber
+      console.log('✅ Order created successfully:', apiResponse.data)
 
-      // Create order summary for WhatsApp (existing code)
+      const orderNumber = apiResponse.data?.orderNumber
+
+      if (!orderNumber) {
+        throw new Error('Order number not received from API')
+      }
+
+      console.log('🎯 Setting confirmation state with orderId:', orderNumber)
+
+      // Create order summary for WhatsApp
       const order: OrderSummary = {
-        orderId: OrderNumber, // Use the order number for display
+        orderId: orderNumber,
         items: cart.items,
         customer: {
           fullName: checkoutState.customerInfo.fullName!,
           email: checkoutState.customerInfo.email!,
           phone: formatSriLankanPhone(checkoutState.customerInfo.phone!),
           address: {
-            street: checkoutState.customerInfo.address!.street,
-            city: checkoutState.customerInfo.address!.city,
-            postalCode: checkoutState.customerInfo.address!.postalCode,
-            province: checkoutState.customerInfo.address!.province,
+            street: checkoutState.customerInfo.address?.street ?? '',
+            city: checkoutState.customerInfo.address?.city ?? '',
+            postalCode: checkoutState.customerInfo.address?.postalCode ?? '',
+            province: checkoutState.customerInfo.address?.province ?? '',
           },
           specialInstructions: checkoutState.customerInfo.specialInstructions,
         },
@@ -257,35 +290,62 @@ export default function CheckoutPage() {
         status: 'pending',
       }
 
-      // Store order in localStorage for tracking (existing code)
+      // Store order in localStorage for tracking
       const existingOrders = JSON.parse(localStorage.getItem('ralhum-orders') || '[]')
-      existingOrders.push(order)
+      existingOrders.push({
+        ...order,
+        customerEmail: checkoutState.customerInfo.email,
+        customerPhone: checkoutState.customerInfo.phone,
+      })
       localStorage.setItem('ralhum-orders', JSON.stringify(existingOrders))
 
-      // Open WhatsApp (existing code)
+      // Open WhatsApp
       openWhatsAppOrder(order)
 
-      // Clear cart and redirect (existing code)
+      // Clear cart
       clearCart()
-      setCheckoutState((prev) => ({ ...prev, step: 'confirmation', OrderNumber }))
+
+      // ✅ Set confirmation state using separate state variables
+      console.log('🎯 Setting confirmation screen with orderId:', orderNumber)
+      setConfirmationOrderId(orderNumber)
+      setShowConfirmation(true)
+
+      // ✅ Also update checkout state for consistency
+      setCheckoutState((prev) => ({
+        ...prev,
+        step: 'confirmation',
+        orderId: orderNumber,
+        isSubmitting: false,
+      }))
 
       toast.success('Order created successfully and sent to WhatsApp!')
     } catch (error) {
-      console.error('Error submitting order:', error)
+      console.error('❌ Error submitting order:', error)
       setApiError(error instanceof Error ? error.message : 'Failed to create order')
       toast.error('Failed to create order. Please try again.')
-    } finally {
+
+      // ✅ Reset submitting state on error
       setCheckoutState((prev) => ({ ...prev, isSubmitting: false }))
     }
   }
 
-  if (cart.items.length === 0) {
+  if (cart.items.length === 0 && !showConfirmation) {
     return null // Will redirect
   }
 
-  if (checkoutState.step === 'confirmation') {
-    return <CheckoutConfirmation orderId={checkoutState.orderId!} />
+  // ✅ Primary check for confirmation screen
+  if (showConfirmation && confirmationOrderId) {
+    console.log('✅ Rendering confirmation screen with orderId:', confirmationOrderId)
+    return <CheckoutConfirmation orderId={confirmationOrderId} />
   }
+
+  // ✅ Fallback check using checkout state
+  if (checkoutState.step === 'confirmation' && checkoutState.orderId) {
+    console.log('✅ Fallback: Rendering confirmation screen from checkoutState')
+    return <CheckoutConfirmation orderId={checkoutState.orderId} />
+  }
+
+  console.log('🎯 Rendering checkout form')
 
   return (
     <main className="min-h-screen pt-16 bg-gray-50">
@@ -615,6 +675,8 @@ export default function CheckoutPage() {
 }
 
 function CheckoutConfirmation({ orderId }: { orderId: string }) {
+  console.log('🎉 CheckoutConfirmation rendered with orderId:', orderId)
+
   return (
     <main className="min-h-screen pt-16 bg-gray-50">
       <div className="max-w-2xl mx-auto px-4 py-16 text-center">
@@ -625,13 +687,13 @@ function CheckoutConfirmation({ orderId }: { orderId: string }) {
 
           <h1 className="text-3xl font-black text-gray-900 mb-4">Order Sent Successfully!</h1>
           <p className="text-gray-600 mb-6">
-            Your order has been sent to our WhatsApp and saved to our system. We'll contact you
+            Your order has been sent to our WhatsApp and saved to our system. We&apos;ll contact you
             shortly to confirm your order and provide payment instructions.
           </p>
 
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <p className="text-sm text-gray-600">Order ID</p>
-            <p className="text-lg font-bold text-[#003DA5]">#{orderId}</p>
+            <p className="text-lg font-bold text-[#003DA5]">#{orderId || 'Processing...'}</p>
           </div>
 
           <div className="space-y-3">

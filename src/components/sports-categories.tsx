@@ -130,15 +130,16 @@ export default function SportsCategories() {
         {/* Bottom Section */}
         <div className="mt-16 text-center">
           <div className="bg-gradient-to-r from-[#003DA5] to-[#FF3D00] rounded-2xl p-8 text-white">
-            <h3 className="text-3xl font-black mb-4">CAN'T FIND YOUR SPORT?</h3>
+            <h3 className="text-3xl font-black mb-4">CAN&apos;T FIND YOUR SPORT?</h3>
             <p className="text-xl mb-6 opacity-90">
-              We also supply equipment for Badminton, Water Polo, Football and more
+              We also supply equipment for Badminton, Netball, Football and more
             </p>
             <Button
+              asChild
               size="lg"
               className="bg-white text-[#003DA5] hover:bg-gray-100 font-bold px-8 py-4 rounded-full"
             >
-              CONTACT OUR TEAM
+              <a href="/contact">CONTACT US</a>
             </Button>
           </div>
         </div>

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import configPromise from '@/payload.config'
 import { getPayload } from 'payload'
+import config from '@/payload.config' // ✅ Fixed: Consistent import pattern
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const payload = await getPayload({ config: configPromise })
+    const payload = await getPayload({ config }) // ✅ Fixed: Use config directly
 
     const order = await payload.findByID({
       collection: 'orders',
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const payload = await getPayload({ config: configPromise })
+    const payload = await getPayload({ config }) // ✅ Fixed: Use config directly
 
     let updateData: any = {}
 
@@ -92,7 +92,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const payload = await getPayload({ config: configPromise })
+    const payload = await getPayload({ config }) // ✅ Fixed: Use config directly
 
     await payload.delete({
       collection: 'orders',
