@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: {
-          orderId: order.orderNumber, // ✅ Use orderNumber (auto-generated field)
+          orderNumber: order.orderNumber, // ✅ Use orderNumber field
           id: order.id,
           status: order.orderStatus, // ✅ Use orderStatus field
           total: order.orderTotal, // ✅ Use orderTotal field

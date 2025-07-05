@@ -218,7 +218,6 @@ export interface OrderCustomer {
 }
 
 export interface OrderInput {
-  orderId: string
   customer: OrderCustomer
   items: Array<{
     id?: string

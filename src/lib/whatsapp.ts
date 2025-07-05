@@ -1,4 +1,4 @@
-import { OrderSummary, WhatsAppMessage } from '@/types/checkout'
+import { OrderSummary } from '@/types/checkout'
 
 // Ralhum Sports WhatsApp Business Number
 export const WHATSAPP_BUSINESS_NUMBER = '+94772350712'
@@ -9,12 +9,11 @@ export const WHATSAPP_BUSINESS_NUMBER = '+94772350712'
 export function formatWhatsAppMessage(order: OrderSummary): string {
   const { customer, items, pricing, orderId } = order
 
-  // Format product list
+  // Format product list with LKR pricing
   const productList = items
     .map((item) => {
       const itemTotal = item.variant.price * item.quantity
-      const itemTotalLKR = Math.round(itemTotal * pricing.exchangeRate)
-      return `• ${item.product.title} (${item.variant.name}) x${item.quantity} - ${itemTotalLKR}`
+      return `• ${item.product.title} (${item.variant.name}) x${item.quantity} - LKR ${itemTotal.toFixed(2)}`
     })
     .join('\n')
 
@@ -46,12 +45,12 @@ Address: ${fullAddress}
 ${productList}
 
 *Pricing:*
-Subtotal: ${pricing.subtotal}
-Shipping: ${pricing.shipping}
-Tax (15%): ${pricing.tax}
-*Total: ${pricing.total}*
+Subtotal: LKR ${pricing.subtotal.toFixed(2)}
+Shipping: LKR ${pricing.shipping.toFixed(2)}
+Tax (15%): LKR ${pricing.tax.toFixed(2)}
+*Total: LKR ${pricing.total.toFixed(2)}*
 
-Order ID: #${orderId}
+Order ID: ${orderId || 'Pending'}
 Date: ${currentDate}
 
 Special Instructions: ${specialInstructions}
@@ -102,14 +101,14 @@ export function getWhatsAppButtonText(): string {
   return isMobile ? 'Confirm Order via WhatsApp' : 'Send Order to WhatsApp'
 }
 
-/**
- * Generate order ID
- */
-export function generateOrderId(): string {
-  const timestamp = Date.now().toString(36)
-  const random = Math.random().toString(36).substr(2, 5)
-  return `RS${timestamp}${random}`.toUpperCase()
-}
+// /**
+//  * Generate order ID [Deprecated - use orderID from the database]
+//  */
+// export function generateOrderId(): string {
+//   const timestamp = Date.now().toString(36)
+//   const random = Math.random().toString(36).substr(2, 5)
+//   return `RS${timestamp}${random}`.toUpperCase()
+// }
 
 /**
  * Validate phone number for Sri Lankan format

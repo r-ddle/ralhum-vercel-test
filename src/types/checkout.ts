@@ -44,7 +44,7 @@ export interface FormErrors {
 }
 
 export interface OrderSummary {
-  orderId: string
+  orderId: any
   items: any[] // CartItem[]
   customer: {
     fullName: string

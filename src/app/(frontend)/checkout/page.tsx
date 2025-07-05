@@ -43,7 +43,6 @@ import {
 } from '@/types/checkout'
 import {
   openWhatsAppOrder,
-  generateOrderId,
   validateSriLankanPhone,
   formatSriLankanPhone,
   getWhatsAppButtonText,
@@ -173,8 +172,6 @@ export default function CheckoutPage() {
     setCheckoutState((prev) => ({ ...prev, isSubmitting: true }))
 
     try {
-      const orderId = generateOrderId()
-
       // Prepare customer data for API
       const customerData: CustomerInput = {
         name: checkoutState.customerInfo.fullName!,
@@ -195,7 +192,6 @@ export default function CheckoutPage() {
 
       // Prepare order data for API
       const orderData: OrderInput = {
-        orderId,
         customer: {
           fullName: checkoutState.customerInfo.fullName!,
           email: checkoutState.customerInfo.email!,
@@ -238,9 +234,11 @@ export default function CheckoutPage() {
         throw new Error(apiResponse.error || 'Failed to create order')
       }
 
+      const OrderNumber = apiResponse.data?.orderNumber
+
       // Create order summary for WhatsApp (existing code)
       const order: OrderSummary = {
-        orderId,
+        orderId: OrderNumber, // Use the order number for display
         items: cart.items,
         customer: {
           fullName: checkoutState.customerInfo.fullName!,
@@ -269,7 +267,7 @@ export default function CheckoutPage() {
 
       // Clear cart and redirect (existing code)
       clearCart()
-      setCheckoutState((prev) => ({ ...prev, step: 'confirmation', orderId }))
+      setCheckoutState((prev) => ({ ...prev, step: 'confirmation', OrderNumber }))
 
       toast.success('Order created successfully and sent to WhatsApp!')
     } catch (error) {
